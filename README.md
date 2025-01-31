@@ -1,7 +1,7 @@
 
 # Bootcamp Respository
 
-This repository contains exercise documents and relevant files for all the sessions held during the TO THE NEW bootcamp
+This repository contains exercise documents and relevant files for all the practical sessions held during the TO THE NEW bootcamp
 
 
 ## Authors
@@ -76,3 +76,33 @@ references - [ppt](https://docs.google.com/presentation/d/1Uh76MArjF7CPdQNImZZuj
         Modified: The file has been altered but these changes haven't been recorded in the repository yet.
         Staged: The modified file has been marked to be included in the next commit.
         Committed: The changes have been saved to the local repository.
+
+
+  ### Introduction to Databases
+  references - [ppt](https://docs.google.com/presentation/d/1XRl422b4x68SdYwfCWrWNdvI1A_bz22zufy6iRhOJN0/edit#slide=id.g7d34a8f7f9_0_123)
+
+- basic terms & keys
+ 
+    Database: Organized collection of data
+
+    **Table**: Used to store/ club data same as excel sheet.
+
+    **Row/Tuple**: is an collection of single entity attributes or group of related data.
+
+    **Column**: feature or attricute
+
+    Super Key: group of single or multiple keys which identifies rows in a table
+
+    Candidate Key: A super key with no repeated attribute 
+
+    **Primary Key**: Uniquely identify a row (entity) into table. Can not contain NULL.
+
+    Alternate Key: Candidate keys which are not primary key
+
+    **Normalization**: Breaking data into multiple tables to reduce redundancy and promote redundancy
+
+- Types of sql statements
+
+    1. Data Defination Language **DDL**: statements to define structure of the data stored
+    2. Data Manipulation Language **DML**: queries used for altering the data itself
+    3. Data Control Language **DCL**: control the visibility of data like granting database access and set privileges to create tables
