@@ -1,4 +1,15 @@
 
+# Bootcamp Respository
+
+This repository contains exercise documents and relevant files for all the sessions held during the TO THE NEW bootcamp
+
+
+## Authors
+
+- Employee name - [Deepanshu Mishra](https://newersworld.tothenew.com/#/unifiedEmployeeView/8210)
+- Employee ID - 8210
+
+
 # Common Sessions
 Common sessions module includes total 9 sessions held from 22 Jan - 31 Jan, 2025 
 ## Week-1
