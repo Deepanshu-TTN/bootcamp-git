@@ -141,7 +141,7 @@ def process_file(options):
             if options['head'] is not None:
                 data_lines = data_lines[:options['head']]
             elif options['tail'] is not None:
-                data_lines = data_lines[-options['tail']:]
+                data_lines = data_lines[-options['tail']-options['skip_rows']:-options['skip_rows']]
             
             data = [parse_quoted_line(line, delimiter, options['quotechar']) 
                    for line in data_lines if line.strip()]
