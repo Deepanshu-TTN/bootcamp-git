@@ -1,11 +1,12 @@
 import sys, os
+import fnmatch
 import datetime
 
 def parse_options(args):
     options = {
         "name":None,
         "atime":None,
-        "type":'f',
+        "type":True,
         "maxdepth":1,
         'search_dir':'.'
     }
@@ -68,7 +69,7 @@ def parse_options(args):
 
 def matchFile(file_path, options):
     file_name = os.path.basename(file_path)
-    if options['name'] not in file_name: 
+    if not fnmatch.fnmatch(file_name, options['name']): 
         return False
 
     is_file = os.path.isfile(file_path)
