@@ -25,8 +25,8 @@ def result_builder(file_path):
                 if class_name:
                     result["class"].append(class_name)
 
-            elif line.startswith("def "):
-                func = line[4:].split("(")[0].strip()
+            elif "def " in line:
+                func = line[line.index('def ')+4:].split("(")[0].strip()
                 if func:
                     result["function"].append(func)
             
