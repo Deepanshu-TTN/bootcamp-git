@@ -1,0 +1,24 @@
+{
+  "b'229'": {
+    "subject": "image attachment",
+    "date": "Tue, 11 Feb 2025 17:09:47 +0530",
+    "from": "Nihal Ahmad <nihal.ahmad@tothenew.com>",
+    "word_count": 17,
+    "line_count": 16,
+    "attachment_count": 1,
+    "attachments": [
+      "Screenshot from 2025-02-10 16-52-28.png"
+    ]
+  },
+  "b'221'": {
+    "subject": "Important document",
+    "date": "Tue, 11 Feb 2025 14:11:05 +0530",
+    "from": "Prakhar Nigam <prakhar.nigam@tothenew.com>",
+    "word_count": 18,
+    "line_count": 14,
+    "attachment_count": 1,
+    "attachments": [
+      "image.png"
+    ]
+  }
+}
