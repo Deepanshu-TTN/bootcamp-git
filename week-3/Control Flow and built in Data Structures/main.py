@@ -3,6 +3,8 @@ def q1(sentance):
     vowels = "aeiou"
     out = []
     word_bank = sentance.split()
+    ##remember
+    # word_list = sum(1 for char in word if char in vowels)
     for word in word_bank:
         vowel_count = 0
         for char in word.lower():
