@@ -1,8 +1,8 @@
 class Prime:
     '''
-    Prime class, 
-    an object can be initialized by giving an optional prime number
-    and optional N and M number for operations 
+    Prime class\n
+    an object can be initialized by giving an optional prime number\n
+    and optional N and M number for operations\n
     '''
     def __init__(self,prime=2,n=0,m=0):
         self.N = n
@@ -12,9 +12,9 @@ class Prime:
 
     def _is_prime(self, n):
         '''
-        Check if the given number is Prime or not. 
-        Takes a number as an argument
-        Returns True or False
+        Check if the given number is Prime or not.\n
+        Takes a number as an argument\n
+        Returns True or False\n
         '''
         if n <= 1:
             return False
@@ -30,9 +30,9 @@ class Prime:
 
     def generate_prime(self, start=1):
         '''
-        This is a generator function that generates prime numbers
-        Takes an optional starting value as an argument
-        Yields an integer
+        This is a generator function that generates prime numbers\n
+        Takes an optional starting value as an argument\n
+        Yields an integer\n
         '''
         num = start + 1
         while True:
@@ -101,11 +101,11 @@ print(P_object._is_prime(13))
 
 '''
 Generate Prime greater than N
+'''
 P_object = Prime(n=20)
 primes_generator = P_object.generate_prime(start=P_object.N)
 for i in range(10):
     print(next(primes_generator))
-'''
 
 
 '''
