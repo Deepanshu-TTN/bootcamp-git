@@ -124,14 +124,14 @@ class CompanyClientsServer:
 
         
         
-new_server = CompanyClientsServer("mjgcq.qjf.hf")
+if __name__=="__main__":
 
-
-#Example requests to the server
-print(new_server.request(url="/get_domains", method="GET", access_token="jbvarverbntrn"))
-print(new_server.request(url="/get_domains", method="GET"))
-print(new_server.request(url="/get_domains", method="GET", access_token="vjcib2opf298fhsb"))
-print(new_server.request(url="/get_client_validation_date", method="GET", client_id="1op"))
-print(new_server.request(url="/get_client_validation_date", method="GET", client_id="10k"))
-print(new_server.request(url="/get_client_validation_date", method="GET", client_id="jbiu"))
-print(new_server.request(url="/broken_link", method="GET"))
+    new_server = CompanyClientsServer("mjgcq.qjf.hf")
+    #Example requests to the server
+    print(new_server.request(url="/get_domains", method="GET", access_token="jbvarverbntrn"))
+    print(new_server.request(url="/get_domains", method="GET"))
+    print(new_server.request(url="/get_domains", method="GET", access_token="vjcib2opf298fhsb"))
+    print(new_server.request(url="/get_client_validation_date", method="GET", client_id="1op"))
+    print(new_server.request(url="/get_client_validation_date", method="GET", client_id="10k"))
+    print(new_server.request(url="/get_client_validation_date", method="GET", client_id="jbiu"))
+    print(new_server.request(url="/broken_link", method="GET"))
