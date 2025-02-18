@@ -88,6 +88,8 @@ class GmailDownloader:
                 "attachment_count": len(attachments),
                 "attachments": attachments
             }
+            if "image" in str(msg):
+                print(num)
             emails[str(num)] = email_data
         
         with open("emails.json", 'w', encoding='utf-8') as f:

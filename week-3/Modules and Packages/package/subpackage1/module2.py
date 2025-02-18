@@ -1,2 +1,4 @@
-def funs2():
-    print("Function call in package/subpackage1/module2.py")
+class ABC:
+    def __init__(self):
+        self._protected = "protected"
+        self.__private = "private"

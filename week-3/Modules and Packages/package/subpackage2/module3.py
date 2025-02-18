@@ -20,5 +20,8 @@ File structure:
 # funs()
 
 #relative path import
-from ..subpackage1.module2 import funs2
-funs2()
+from ..subpackage1.module2 import ABC
+
+def func():
+    abc = ABC()
+    print(dir(abc))
