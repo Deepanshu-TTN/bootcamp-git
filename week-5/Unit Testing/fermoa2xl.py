@@ -42,7 +42,8 @@ class Sansevierias:
     def _get_soup(self, page_url):
         res = requests.get(page_url)
         if res.status_code==200:
-            return BeautifulSoup(res.content, 'html.parser')
+            soup = BeautifulSoup(res.content, 'html.parser')
+            return soup
         else:
             raise ValueError(f'Got a bad response: {res.status_code}')
 
@@ -139,14 +140,20 @@ class Sansevierias:
                 page_number+=1
             except AssertionError:
                 #No more products left for fetching, add headers and return
-                headers = ['Product Name', 'Price', 'Variegated', 'Combo Amount', 'Listing Tags', 'Product Url']
-                self.add_headers(headers)
+                try:
+                    headers = ['Product Name', 'Price', 'Variegated', 'Combo Amount', 'Listing Tags', 'Product Url']
+                    self.add_headers(headers)
+                except ValueError as e:
+                    print(e)
                 break
         return None
 
 
     def add_headers(self, headers:list):
         '''This function adds an empty row at the top and adds valid headers to it'''
+        if not self.ws: 
+            raise ValueError(f'Instance doesnt have a worksheet')
+
         headers.extend([f'name{n}' for n in range(1, self.max_names+1)])
         self.ws.insert_rows(1)
         for col, heading in enumerate(headers):
