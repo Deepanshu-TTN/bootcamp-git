@@ -7,9 +7,15 @@ from fermoa2xl import Sansevierias
 
 class TestSansevierias(unittest.TestCase):
     def setUp(self):
-        self.base_url = "https://fermosaplants.com/collections/sansevieria?page="
-        self.scraper = Sansevierias(self.base_url)
+        '''
+        Setup function sets an object value,
+        Sets a few Dummy data attributes to be used later
+        '''
+
+        self.__base_url = "https://fermosaplants.com/collections/sansevieria?page="
+        self.scraper = Sansevierias(self.__base_url)
         
+        #main listings page mock html string
         self.sample_listings_html = '''
             <div class="product-item-v5">
                 <h4 class="title-product">
@@ -31,6 +37,7 @@ class TestSansevierias(unittest.TestCase):
             </div>
         '''
         
+        #different kinds of product pages in a list with concerned paths only
         self.sample_product_page_html = [
             '''<div class="pd_summary">
                 About Sansevieria Trifasciata - Beautiful Snake Plant
@@ -70,6 +77,12 @@ class TestSansevierias(unittest.TestCase):
 
     @patch('requests.get')
     def test_get_soup(self, mock_get):
+        '''
+        tests the Sansevierias._get_soup method, method covers two paths 
+         - if response is good (status_code==200)
+         - if the response is not good
+        Mocks the requests.get function to return a dummy html string and a dummy status codes
+        '''
         mock_res = Mock()
         mock_res.status_code = 200
         mock_res.content = "<html><body>Test</body></html>"
@@ -83,8 +96,15 @@ class TestSansevierias(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.scraper._get_soup("test_url")
 
+
     @patch('fermoa2xl.Sansevierias._get_soup')
     def test_scrape_page(self,mock_get_soup):
+        '''
+        tests the Sansevierias.scrape_page method, method covers two paths
+         - if products are fetched, check if data is good
+         - if products are not fetched AssertionError is raised
+        Mocks the _get_soup method for returning a dummy BeautifulSoup object to be used in the function
+        '''
         product_page_soup = BeautifulSoup(self.sample_product_page_html[0], 'html.parser')
         mock_get_soup.return_value = product_page_soup
         
@@ -110,6 +130,14 @@ class TestSansevierias(unittest.TestCase):
         
 
     def test_extract_names(self):
+        '''
+        tests Sansevierias.extract_names method, method covers 4 paths
+         - if combo attribute is True
+          - if a name is fetched through regex1
+          - if a name is fetched through regex2
+          - if a name is not found
+         - if Combo attribute is False
+        '''
         product_page_one_soup = BeautifulSoup(self.sample_product_page_html[0], 'html.parser')
         names_list = self.scraper.extract_names(product_page_one_soup,True)
         self.assertEqual(set(names_list), set(['Trifasciata', 'Laurentii', 'Black Gold']))
@@ -130,8 +158,9 @@ class TestSansevierias(unittest.TestCase):
     @patch('fermoa2xl.Sansevierias.scrape_page')
     def test_scrape_from(self, mock_get_soup, mock_scrape_page):
         mock_get_soup.return_value = BeautifulSoup(self.sample_listings_html, 'html.parser')
+        mock_return_data = [["Product1", "999", False, 1, "plant", "url1", "Name1"],['asda']]
         mock_scrape_page.side_effect = [
-            list(["Product1", "999", False, 1, "plant", "url1", "Name1"]),
+            mock_return_data,
             AssertionError()
         ]
         

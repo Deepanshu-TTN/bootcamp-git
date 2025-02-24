@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 from openpyxl import Workbook
+from threading import Thread
 import requests
-import re
+import re  
+import time 
 
 
 
@@ -39,13 +41,29 @@ class Sansevierias:
         self.name_set = set()
 
 
-    def scrape_page(self, page_url):
+    def fetch_from_page_url(self, url):
+        '''This function calls the _get_soup and scrape page from a single method call'''
+        soup = self._get_soup(url)
+        page = self.scrape_page(soup)
+        print(f'{len(page)} entries fetched from page {url[-1]}')
+
+
+    def _get_soup(self, page_url):
+        res = requests.get(page_url)
+        if res.status_code==200:
+            soup = BeautifulSoup(res.content, 'html.parser')
+            return soup
+        else:
+            raise ValueError(f'Got a bad response: {res.status_code}')
+
+
+
+    def scrape_page(self, soup:BeautifulSoup):
         '''
         Scrape page function, takes in a fermosa webpage url and scrapes listed products\n
         returns a list of scraped products data
         '''
-        res = requests.get(page_url)
-        soup = BeautifulSoup(res.content, 'html.parser')
+
         sansevierias = soup.find_all("div", class_="product-item-v5")
         
         #raise error if no items are fetched
@@ -69,7 +87,9 @@ class Sansevierias:
             is_Variegated = get_or_default(self.patterns['is_Variegated'](listing_name), True, False) 
             listing_types = get_or_default(self.patterns['listing_type'](listing_name), None, [])
 
-            names = self.extract_names(listing_url, 'combo' in listing_name.lower())
+            item_soup = self._get_soup(listing_url)
+
+            names = self.extract_names(item_soup, 'combo' in listing_name.lower())
             if names == []:
                 names.append(listing_name.strip())
             self.name_set = self.name_set.union([name.replace("'", '').title() for name in names])
@@ -94,14 +114,11 @@ class Sansevierias:
         return data_scraped
     
 
-    def extract_names(self, item_url, combo:bool)->list[str]:
+    def extract_names(self, soup:BeautifulSoup, combo:bool)->list[str]:
         '''
         This function extracts names from a given fermosa product webpage url,\n
         Also Information weather its a single product or a combo and returns a list of names for the listing
         '''
-        res = requests.get(item_url)
-        soup = BeautifulSoup(res.content, 'html.parser')
-
         if not combo:
             _summary = soup.find('div', class_='pd_summary').text
             summary = re.sub(' ', ' ', _summary)
@@ -126,19 +143,26 @@ class Sansevierias:
         while True:
             try:
                 curr_url = self.base_url+str(page_number)
-                data_entries = self.scrape_page(curr_url)
+                soup = self._get_soup(curr_url)
+                data_entries = self.scrape_page(soup)
                 print(f'{len(data_entries)} entries fetched from page {page_number}')
                 page_number+=1
             except AssertionError:
                 #No more products left for fetching, add headers and return
-                headers = ['Product Name', 'Price', 'Variegated', 'Combo Amount', 'Listing Tags', 'Product Url']
-                self.add_headers(headers)
+                try:
+                    headers = ['Product Name', 'Price', 'Variegated', 'Combo Amount', 'Listing Tags', 'Product Url']
+                    self.add_headers(headers)
+                except ValueError as e:
+                    print(e)
                 break
         return None
 
 
     def add_headers(self, headers:list):
         '''This function adds an empty row at the top and adds valid headers to it'''
+        if not self.ws: 
+            raise ValueError(f'Instance doesnt have a worksheet')
+
         headers.extend([f'name{n}' for n in range(1, self.max_names+1)])
         self.ws.insert_rows(1)
         for col, heading in enumerate(headers):
@@ -146,16 +170,50 @@ class Sansevierias:
         return None
 
 
-if __name__ == '__main__':
+def main_without_threading():
     wb = Workbook()
-    ws = wb.create_sheet("Sansevierias")
+    ws = wb.create_sheet("Non Threading output")
 
     base_url = "https://fermosaplants.com/collections/sansevieria?page="
 
     fermosa_scraper = Sansevierias(base_url, ws)
+
     fermosa_scraper.scrape_from(page_number=1)
     print(f'{len(fermosa_scraper.name_set)} distinct values found!')
-    for name in fermosa_scraper.name_set:
-        print(name, end=', ')
+    # for name in fermosa_scraper.name_set:
+    #     print(name, end=', ')
+    print()
 
     wb.save('plantbook.xlsx')
+
+
+def main_with_threading():
+    wb = Workbook()
+    ws = wb.create_sheet("Sansevierias")
+
+    base_url = "https://fermosaplants.com/collections/sansevieria?page="
+    fermosa_scraper = Sansevierias(base_url, ws)
+    threads = []
+
+
+    for page in range(1,8):
+        curr_thread = Thread(target=fermosa_scraper.fetch_from_page_url, args=(base_url+str(page),))
+        threads.append(curr_thread)
+        curr_thread.start()
+    
+    for thread in threads:
+        thread.join()
+
+    headers = ['Product Name', 'Price', 'Variegated', 'Combo Amount', 'Listing Tags', 'Product Url']
+    
+    fermosa_scraper.add_headers(headers)
+        
+    print(f'{len(fermosa_scraper.name_set)} distinct values found!')
+    wb.save('plantbook.xlsx')
+
+
+if __name__ == '__main__':
+    start = time.time()
+    main_with_threading()
+    end = time.time()
+    print(f'Script took {end-start:0.2f} seconds to execute')
