@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Portal</title>
+</head>
+<body>
+    <h2>Hello {{ user }}</h2>
+    <button type="button"><a href="{% url 'additem' %}">
+      Add item
+    </a>
+  </button>
+    <h1>Shop items: </h1>
+    <p>{% if keyword %} keyword: '{{keyword}}' {% endif %}</p>
+    <p>{% if max_price or min_price %} price range: less than {{max_price}} {% endif %}</p>
+    <table width="100%">
+        <tr>
+          {% for item in items %}
+            {% if forloop.counter0|divisibleby:3 and not forloop.first %}
+              </tr><tr>
+            {% endif %}
+            <td width="33%" valign="top">
+              <table >
+                <tr>
+                  <td height="50"><h2>{{item.item_name|truncatechars:20}}</h2></td>
+                </tr>
+                <tr>
+                  <td height="100"><img src="{{item.item_image.url}}" alt="{{item.item_name}}" height="100" width="100"></td>
+
+                </tr>
+                <tr>
+                  <td height="30"><strong>Price:</strong> Rs. {{item.item_price}}</td>
+                </tr>
+                <tr>
+                  <td height="70"><strong>Description:</strong> {{item.item_description|truncatechars:50}}</td>
+                </tr>
+                <tr>
+                  <td height="30"><strong>Rating:</strong> {{item.item_rating}} &#9733;</td>
+                </tr>
+                <tr>
+                  <td>
+                    <form method="POST" action="{% url 'remove' item.id %}">
+                      {% csrf_token %} 
+                      <button type="submit" id="Remove">Remove</button>
+                    </form>
+                    <form method="get" action="{% url 'edit' item.id %}">
+                      <button type="submit" id="Edit">edit</button>
+                    </form>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          {% endfor %}
+        </tr>
+      </table>
+</body>
+</html>

@@ -4,8 +4,8 @@ from django.core.exceptions import ValidationError
 
 
 class MenuItem(models.Model):
-    item_name = models.CharField(max_length=100)
-    item_price = models.IntegerField(validators=(
+    item_name = models.CharField(max_length=100, default='')
+    item_price = models.IntegerField(default=0, validators=(
         MaxValueValidator(
             limit_value=10000,
             message='Product too expensive!'),
@@ -16,7 +16,7 @@ class MenuItem(models.Model):
     ))
 
     item_description = models.TextField()
-    item_rating = models.IntegerField(choices=[(i, i) for i in range(1,6)])
-    item_image = models.ImageField(upload_to='images/', 
-                                   null=True, 
-                                   blank=True,)
+    item_rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=5)
+    item_image = models.ImageField(upload_to='images/', null=False, blank=False, default='images/default.png')
+
+
