@@ -46,25 +46,27 @@ multiline Python string. Triple quotes (''' or \""") can be used to create a mul
 you to format text over many lines and include line breaks. Put two triple quotes around the multiline 
 Python string, one at the start and one at the end, to define it."""
 
-word_bank = astring.split()
+# word_bank = astring.split()
 
-word_counts = {}
+# word_counts = {}
 
-for word in word_bank:
-    if word in word_counts:
-        word_counts[word] += 1
-    else:
-        word_counts[word] = 1
+# for word in word_bank:
+#     if word in word_counts:
+#         word_counts[word] += 1
+#     else:
+#         word_counts[word] = 1
 
-result = []
-for word, count in word_counts.items():
-    if count > 1:
-        result.append((word, count))
-
-
-result.sort()
+# result = []
+# for word, count in word_counts.items():
+#     if count > 1:
+#         result.append((word, count))
 
 
-print("Word\t Length\tOccurence")
-for word, count in result:
-    print(f"{word}\t {len(word)}\t{count}")
+# result.sort()
+
+
+# print("Word\t Length\tOccurence")
+# for word, count in result:
+#     print(f"{word}\t {len(word)}\t{count}")
+
+q3("i am a am a deepanshu i am not a dog")

@@ -20,3 +20,7 @@ class MenuItem(models.Model):
     item_image = models.ImageField(upload_to='images/', null=False, blank=False, default='images/default.png')
 
 
+    def __str__(self):
+        return self.item_name
+
+

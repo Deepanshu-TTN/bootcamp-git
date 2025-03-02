@@ -19,7 +19,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.DO_NOTHING)
     item_qty = models.IntegerField(validators=[
         MaxValueValidator(
             limit_value=10,
@@ -29,4 +29,6 @@ class OrderItem(models.Model):
             message='Invalid quantity provided'
         )
     ])
+    # price = models.DecimalField(default=0)
     order_instance = models.ForeignKey(Order, on_delete=models.CASCADE)
+    
