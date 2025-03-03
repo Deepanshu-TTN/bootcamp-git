@@ -11,7 +11,7 @@ order_status_bank = [
 ]
 
 class Order(models.Model):
-    customer_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    customer_id = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
     order_total_price = models.IntegerField()
     order_status = models.CharField(max_length=10, choices=order_status_bank, default='Pending')
     order_place_time = models.DateTimeField(auto_now=True, editable=False)
@@ -19,7 +19,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.DO_NOTHING)
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.DO_NOTHING, db_constraint=False)
     item_qty = models.IntegerField(validators=[
         MaxValueValidator(
             limit_value=10,
@@ -30,4 +30,4 @@ class OrderItem(models.Model):
         )
     ])
     order_instance = models.ForeignKey(Order, on_delete=models.CASCADE)
-    item_total_price = models.DecimalField(default=0)
+    item_total_price = models.DecimalField(default=0, decimal_places=2, max_digits=6)

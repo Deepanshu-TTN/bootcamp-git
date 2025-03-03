@@ -11,6 +11,10 @@
       Add item
     </a>
   </button>
+  <button type="button"><a href="{% url 'orders_list' %}">
+    View orders
+  </a>
+</button>
     <h1>Shop items: </h1>
     <p>{% if keyword %} keyword: '{{keyword}}' {% endif %}</p>
     <p>{% if max_price or min_price %} price range: less than {{max_price}} {% endif %}</p>

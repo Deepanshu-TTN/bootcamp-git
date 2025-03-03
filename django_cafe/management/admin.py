@@ -50,4 +50,4 @@ class MenuItemAdmin(admin.ModelAdmin):
     actions=[download_csv]
     
     def has_add_permission(self, request):
-        return request.user.is_staff and request.user.groups.filter(name='Editors')
+        return request.user.is_staff

@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden
-from .models import MenuItem
-from .forms import MenuItemForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from customer.models import Order, OrderItem
+from .models import MenuItem
+from .forms import MenuItemForm
 
 
 def decorator_is_staff(func):
@@ -77,3 +78,30 @@ def get_query(request):
 
     menu_items = MenuItem.objects.filter(q)
     return render(request, 'management/items_list.html', {'items':menu_items, 'keyword':search, 'max_price':max_price})
+
+
+@login_required
+@decorator_is_staff
+def orders_list(request):
+    pending = request.GET.get('p')
+    if pending:
+        orders = Order.objects.filter(order_status='pending' if pending=='1' else 'completed').order_by('-order_place_time').prefetch_related('orderitem_set')
+        return render(request, 'management/orders_list.html', {'orders': orders, 'status':'pending' if pending=='1' else 'completed'})
+    orders = Order.objects.order_by('-order_place_time').prefetch_related('orderitem_set')
+    return render(request, 'management/orders_list.html', {'orders': orders})
+    
+
+
+@login_required
+@decorator_is_staff
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order_items = order.orderitem_set.all() 
+    if request.method == 'POST':
+        new_status = request.POST.get('order_status')
+        if new_status:
+            order.order_status = new_status
+            order.save()
+            return redirect('order_detail', order_id=order.id)
+
+    return render(request, 'management/order_detail.html', {'order': order, 'order_items': order_items})

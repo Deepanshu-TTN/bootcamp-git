@@ -7,7 +7,7 @@
 </head>
 <body>
     <h2>Hello {{ user }}</h2>
-    <button type="button"><a href="{% url 'additem' %}">
+    <button type="button"><a href="{% url 'order_page' %}">
       Order Item
     </a>
   </button>
@@ -42,17 +42,6 @@
                 </tr>
                 <tr>
                   <td height="30"><strong>Rating:</strong> {{item.item_rating}} &#9733;</td>
-                </tr>
-                <tr>
-                  <td>
-                    <form method="POST" action="{% url 'remove' item.id %}">
-                      {% csrf_token %} 
-                      <button type="submit" id="Remove">Remove</button>
-                    </form>
-                    <form method="get" action="{% url 'edit' item.id %}">
-                      <button type="submit" id="Edit">edit</button>
-                    </form>
-                  </td>
                 </tr>
               </table>
             </td>

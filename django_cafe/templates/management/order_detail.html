@@ -1,0 +1,23 @@
+<button><a href="{% url 'manage' %}">Manage Page</a></button>
+<button><a href="{% url 'orders_list' %}">Orders Page</a></button>
+
+<p>Order Placed Time: {{ order.order_place_time }}</p>
+<p>Total Price: Rs. {{ order.order_total_price }}</p>
+
+<h3>Order Items:</h3>
+{% for item in order_items %}
+    <p>Item: {{ item.menu_item.item_name }} x{{item.item_qty}}</p>
+    <p>Item Total Price: Rs. {{ item.item_total_price }}</p>
+    
+{% endfor %}
+
+<form action="{% url 'order_detail' order.id %}" method="post">
+    {% csrf_token %}
+    <label for="order_status">Order Status:</label>
+    <select name="order_status" id="order_status">
+        <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
+
+    </select>
+    <button type="submit">Update Status</button>
+</form>

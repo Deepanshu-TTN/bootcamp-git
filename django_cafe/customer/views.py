@@ -1,7 +1,6 @@
-import json
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from management.models import MenuItem
 from .models import Order, OrderItem
@@ -24,127 +23,80 @@ def home(request):
 @login_required
 def order_page(request):
     menu_items = MenuItem.objects.all()
-    return render(request, 'customer/order.html', {'menu_items': menu_items})
+    return render(request, 'customer/order.html', {'items': menu_items})
 
 @login_required
-def add_to_cart(request):
+def place_order(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        menu_item_id = data.get('menu_item_id')
-        quantity = data.get('quantity', 1)
+        selected_items = {}
+        for key, value in request.POST.items():
+            if key.startswith('quantity_') and int(value) > 0:
+                item_id = key.replace('quantity_', '')
+                selected_items[item_id] = int(value)
         
-        menu_item = get_object_or_404(MenuItem, id=menu_item_id)
+        if not selected_items:
+            messages.error(request, 'Please select at least one item to order.')
+            return redirect('order_page')
         
-        cart = request.session.get('cart', {})
-        if menu_item_id in cart:
-            cart[menu_item_id] = quantity
-        else:
-            cart[menu_item_id] = quantity
+        total_price = 0
+        order_items = []
+        
+        for item_id, quantity in selected_items.items():
+            menu_item = get_object_or_404(MenuItem, id=item_id)
+            item_total = menu_item.item_price * quantity
+            total_price += item_total
             
-        request.session['cart'] = cart
-        
-        total_price = 0
-        cart_items = []
-        
-        for item_id, qty in cart.items():
-            item = MenuItem.objects.get(id=item_id)
-            item_total = item.item_price * qty
-            total_price += item_total
-            cart_items.append({
-                'id': item_id,
-                'name': item.item_name,
-                'price': item.item_price,
-                'quantity': qty,
-                'total': item_total
+            order_items.append({
+                'menu_item': menu_item,
+                'quantity': quantity,
+                'item_total': item_total
             })
         
-        return JsonResponse({
-            'success': True, 
-            'cart_items': cart_items, 
+        request.session['order_preview'] = {
+            'items': [(item['menu_item'].id, item['quantity']) for item in order_items],
+            'total_price': total_price
+        }
+        
+        return render(request, 'customer/order_confirmation.html', {
+            'items': order_items,
             'total_price': total_price
         })
     
-    return JsonResponse({'success': False})
+    return redirect('order_page')
 
 @login_required
-def update_cart(request):
+def confirm_order(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        menu_item_id = data.get('menu_item_id')
-        quantity = data.get('quantity')
+        order_data = request.session.get('order_preview')
         
-        if quantity <= 0:
-            cart = request.session.get('cart', {})
-            if menu_item_id in cart:
-                del cart[menu_item_id]
-                request.session['cart'] = cart
-        else:
-            cart = request.session.get('cart', {})
-            cart[menu_item_id] = min(quantity, 10) 
-            request.session['cart'] = cart
-        
-        total_price = 0
-        cart_items = []
-        
-        for item_id, qty in cart.items():
-            item = MenuItem.objects.get(id=item_id)
-            item_total = item.item_price * qty
-            total_price += item_total
-            cart_items.append({
-                'id': item_id,
-                'name': item.item_name,
-                'price': item.item_price,
-                'quantity': qty,
-                'total': item_total
-            })
-        
-        return JsonResponse({
-            'success': True, 
-            'cart_items': cart_items, 
-            'total_price': total_price
-        })
-    
-    return JsonResponse({'success': False})
-
-@login_required
-def create_order(request):
-    if request.method == 'POST':
-        cart = request.session.get('cart', {})
-        
-        if not cart:
-            return JsonResponse({'success': False, 'message': 'Cart is empty'})
-        
-        total_price = 0
-        for item_id, qty in cart.items():
-            item = MenuItem.objects.get(id=item_id)
-            total_price += item.item_price * qty
-        
+        if not order_data:
+            messages.error(request, 'Your order session has expired. Please start again.')
+            return redirect('order_page')
+        print(request.user)
         order = Order.objects.create(
             customer_id=request.user,
-            order_total_price=total_price,
+            order_total_price=order_data['total_price'],
             order_status='pending'
         )
         
-        for item_id, qty in cart.items():
-            menu_item = MenuItem.objects.get(id=item_id)
-            item_total = menu_item.item_price * qty
+        for item_id, quantity in order_data['items']:
+            menu_item = get_object_or_404(MenuItem, id=item_id)
+            item_total = menu_item.item_price * quantity
             
             OrderItem.objects.create(
                 menu_item=menu_item,
-                item_qty=qty,
+                item_qty=quantity,
                 order_instance=order,
                 item_total_price=item_total
             )
         
-        request.session['cart'] = {}
+        if 'order_preview' in request.session:
+            del request.session['order_preview']
         
-        return JsonResponse({
-            'success': True, 
-            'order_id': order.id,
-            'message': 'Order placed successfully!'
-        })
+        messages.success(request, 'Your order has been placed successfully!')
+        return redirect('order_detail', order_id=order.id)
     
-    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+    return redirect('order_page')
 
 @login_required
 def order_history(request):
@@ -158,5 +110,5 @@ def order_detail(request, order_id):
     
     return render(request, 'customer/order_detail.html', {
         'order': order,
-        'order_items': order_items
+        'items': order_items
     })

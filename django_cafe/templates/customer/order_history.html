@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {%for order in orders%}
+    <p>{{order.order_place_time}}</p>
+    <p>{{order.order_completed_time}}</p>
+    <p>{{order.order_status}}</p>
+    <p>{{order_total_price}}</p>
+    <a href="{% url 'order_detail' order.id%}"> view detailed order</a>
+    {%endfor%}
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% if status %}
+<h1>
+    Viewing {{status}} orders
+</h1>
+{%else%}
+<h1>
+    Viewing all orders
+</h1>
+{% endif %}
+<form action="{%url 'orders_list'%}">
+    <button type="submit" name="p" value="0">View Completed</button>
+    <button type="submit" name="p" value="1">View Pending</button>
+    <button type="submit">View All</button>
+</form>
+<button><a href="{% url 'manage' %}">Manage Menu Items</a></button>
+{%for order in orders %}
+<p>{{order.order_place_time}}</p>
+<p>{{order.order_total_price}}</p>
+{% for item in order.orderitem_set.all %}
+<p>{{item.menu_item.item_name}}</p>
+<p>{{item.item_total_pice}}</p>
+{%endfor%}
+    <a href="{% url 'order_detail' order.id %}">view order</a>
+{%endfor%}

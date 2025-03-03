@@ -88,20 +88,16 @@ flush privileges;
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    'content': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'django_cafe',
         'USER': 'connector', 
         'PASSWORD': 'Secret_1234', 
         'HOST': 'localhost', 
         'PORT': '3306',
-    }
+        'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},
+    },
 }
 
-DATABASE_ROUTERS = ['management.db_routers.MenuItemRouter']
 
 
 # Password validation
