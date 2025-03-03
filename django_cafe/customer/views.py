@@ -9,6 +9,9 @@ from .models import Order, OrderItem
 def home(request):
     search = request.GET.get('search')
     max_price = request.GET.get('lt')
+    category = request.GET.get('category')
+
+    user = request.user if str(request.user)!='AnonymousUser' else None
 
     q=Q()
     if search:
@@ -16,16 +19,20 @@ def home(request):
 
     if max_price:
         q &= Q(item_price__lt=max_price)
+
+    if category:
+        q &= Q(category=category)
+        
     menu_items = MenuItem.objects.filter(q)
-    return render(request, 'customer/items_list.html', {'items': menu_items})
+    return render(request, 'customer/items_list.html', {'items': menu_items, 'user':user})
 
 
-@login_required
+@login_required(login_url='/auth/login')
 def order_page(request):
     menu_items = MenuItem.objects.all()
     return render(request, 'customer/order.html', {'items': menu_items})
 
-@login_required
+@login_required(login_url='/auth/login')
 def place_order(request):
     if request.method == 'POST':
         selected_items = {}
@@ -64,7 +71,7 @@ def place_order(request):
     
     return redirect('order_page')
 
-@login_required
+@login_required(login_url='/auth/login')
 def confirm_order(request):
     if request.method == 'POST':
         order_data = request.session.get('order_preview')
@@ -98,12 +105,12 @@ def confirm_order(request):
     
     return redirect('order_page')
 
-@login_required
+@login_required(login_url='/auth/login')
 def order_history(request):
     orders = Order.objects.filter(customer_id=request.user).order_by('-order_place_time')
     return render(request, 'customer/order_history.html', {'orders': orders})
 
-@login_required
+@login_required(login_url='/auth/login')
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer_id=request.user)
     order_items = OrderItem.objects.filter(order_instance=order)

@@ -80,7 +80,7 @@ def get_query(request):
     return render(request, 'management/items_list.html', {'items':menu_items, 'keyword':search, 'max_price':max_price})
 
 
-@login_required
+@login_required(login_url='/auth/login')
 @decorator_is_staff
 def orders_list(request):
     pending = request.GET.get('p')
@@ -92,7 +92,7 @@ def orders_list(request):
     
 
 
-@login_required
+@login_required(login_url='/auth/login')
 @decorator_is_staff
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)

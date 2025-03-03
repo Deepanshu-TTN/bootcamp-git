@@ -6,7 +6,9 @@
     <title>Management Portal</title>
 </head>
 <body>
-    <h2>Hello {{ user }}</h2>
+  <div>
+    <h2>Hello {{ user }} <a href="{% url 'logout' %}" style="font-size: small;">Logout</a></h2>
+  </div>
     <button type="button"><a href="{% url 'additem' %}">
       Add item
     </a>
@@ -32,6 +34,9 @@
                 <tr>
                   <td height="100"><img src="{{item.item_image.url}}" alt="{{item.item_name}}" height="100" width="100"></td>
 
+                </tr>
+                <tr>
+                  <td height="30"><strong>{{item.get_category_display}}</strong></td>
                 </tr>
                 <tr>
                   <td height="30"><strong>Price:</strong> Rs. {{item.item_price}}</td>

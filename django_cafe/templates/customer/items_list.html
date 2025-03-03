@@ -6,17 +6,32 @@
     <title>The CafE</title>
 </head>
 <body>
-    <h2>Hello {{ user }}</h2>
+  {% if user %}
+    <h2>Hello {{ user }} <a href="{% url 'logout' %}" style="font-size: small;"> logout</a></h2>
     <button type="button"><a href="{% url 'order_page' %}">
       Order Item
     </a>
   </button>
+  {% else %}
+  <h2>Welcome to the CafE, <a href="{%url 'login'%}">login here</a></h2>
+  {% endif %}
     <h1>Shop items: </h1>
     <form action="{% url 'home' %}" method="GET">
       <input type="search" name="search" placeholder="Search.." aria-label="Search">
       <input type="lt" name="lt" placeholder="Max Price.." aria-label="Price">
+      <select name="category">
+        <option value="" selected>All</option>
+        <option value="0">Coffee</option>
+        <option value="1">Tea</option>
+        <option value="2">Cookies</option>
+        <option value="3">Muffins</option>
+        <option value="4">Cakes & Cupcakes</option>
+        <option value="5">Pastries</option>
+        <option value="6">Light Bites</option>
+      </select>
       <button type="submit">Go</button>
 </form>
+<a href="{% url 'home'%}">Go back</a>
     <p>{% if keyword %} keyword: '{{keyword}}' {% endif %}</p>
     <p>{% if max_price or min_price %} price range: less than {{max_price}} {% endif %}</p>
     <table width="100%">

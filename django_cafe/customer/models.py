@@ -13,7 +13,7 @@ order_status_bank = [
 class Order(models.Model):
     customer_id = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
     order_total_price = models.IntegerField()
-    order_status = models.CharField(max_length=10, choices=order_status_bank, default='Pending')
+    order_status = models.CharField(max_length=10, choices=order_status_bank, default='pending')
     order_place_time = models.DateTimeField(auto_now=True, editable=False)
     order_completed_time = models.DateTimeField(null=True, blank=True)
 

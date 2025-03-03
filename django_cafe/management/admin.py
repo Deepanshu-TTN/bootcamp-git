@@ -3,6 +3,10 @@ from django.http import HttpResponse
 from django.contrib import admin
 from . import models
 
+
+admin.site.site_header = 'Admin Dashboard'
+
+
 @admin.action(description='Download CSV for selected')
 def download_csv(model_admin, request, queryset):
     response = HttpResponse(content_type='text/csv')
@@ -39,14 +43,36 @@ class MenuItemPriceFilter(admin.SimpleListFilter):
             return queryset.filter(item_price__range=(100, 200))
         if self.value() == '500<=':
             return queryset.filter(item_price__gte=500)
+        
 
-admin.site.site_header = 'Admin Dashboard'
+class MenuCategoryFilter(admin.SimpleListFilter):
+    title='Filter by Categories'
+    parameter_name='category'
+
+    def lookups(self, request, model_admin):
+        return (
+            (0, 'Coffee'),
+            (1, 'Tea'),
+            (2, 'Cookies'),
+            (3, 'Muffins'),
+            (4, 'Cakes & Cupcakes'),
+            (5, 'Pastries'),
+            (6, 'Light Bites'),
+        )
+    
+    def queryset(self, request, queryset):
+        if self.value() is not None:
+            category = int(self.value())
+            return queryset.filter(category=category)
+        return queryset
+                
+
 
 @admin.register(models.MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ('item_name', 'item_price', 'item_rating')
+    list_display = ('item_name', 'item_price', 'category', 'item_rating')
     search_fields = ('item_name',)
-    list_filter = (MenuItemPriceFilter,)
+    list_filter = (MenuItemPriceFilter, MenuCategoryFilter)
     actions=[download_csv]
     
     def has_add_permission(self, request):
