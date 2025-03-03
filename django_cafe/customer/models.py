@@ -29,6 +29,5 @@ class OrderItem(models.Model):
             message='Invalid quantity provided'
         )
     ])
-    # price = models.DecimalField(default=0)
     order_instance = models.ForeignKey(Order, on_delete=models.CASCADE)
-    
+    item_total_price = models.DecimalField(default=0)
