@@ -7,7 +7,13 @@
 </head>
 <body>
   {% if user %}
-    <h2>Hello {{ user }} <a href="{% url 'logout' %}" style="font-size: small;"> logout</a></h2>
+    <h2>Hello {{ user }} 
+      <a href="{% url 'logout' %}" style="font-size: small;"> logout</a>
+      {% if user.is_staff %}
+      <a href="{% url 'manage' %}" style="font-size: small;"> management</a>
+      {% endif %}
+      <a href="{% url 'orders_list_customer' %}" style="font-size: small;"> orders</a>
+    </h2>
     <button type="button"><a href="{% url 'order_page' %}">
       Order Item
     </a>

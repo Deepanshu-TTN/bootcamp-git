@@ -10,11 +10,11 @@
     <p>placed at {{ order.order_place_time }}</p>
 
     {% for item in items %}
-    <h3>{{item.menu_item.item_nme }}</h3>
+    <h3>{{item.menu_item.item_name }}</h3>
     <p> qty: {{ item.item_qty }}</p>
     <p> item total: {{ item.item_total_price }}</p>
     {% endfor %}
 
-    <p> order total price: order.order_total_price</p>
+    <p> order total price: Rs. {{order.order_total_price}}</p>
 </body>
 </html>

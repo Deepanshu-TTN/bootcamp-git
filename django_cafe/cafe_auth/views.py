@@ -7,6 +7,11 @@ from django.db import IntegrityError
 User = get_user_model()
 
 def signupuser(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('manage')
+        return redirect('home')
+    
     if request.method == 'GET':
         return render(request, 'signupuser.html', {'form':UserCreationForm()})
     else:
@@ -29,6 +34,10 @@ def signupuser(request):
 
 
 def loginuser(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('manage')
+        return redirect('home')
     if request.method == 'GET':
         return render(request, 'loginuser.html', {'form':AuthenticationForm()})
     else:

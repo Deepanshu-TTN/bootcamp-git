@@ -83,10 +83,10 @@ def get_query(request):
 @login_required(login_url='/auth/login')
 @decorator_is_staff
 def orders_list(request):
-    pending = request.GET.get('p')
-    if pending:
-        orders = Order.objects.filter(order_status='pending' if pending=='1' else 'completed').order_by('-order_place_time').prefetch_related('orderitem_set')
-        return render(request, 'management/orders_list.html', {'orders': orders, 'status':'pending' if pending=='1' else 'completed'})
+    status_value = request.GET.get('status')
+    if status_value:
+        orders = Order.objects.filter(order_status=status_value).order_by('-order_place_time').prefetch_related('orderitem_set')
+        return render(request, 'management/orders_list.html', {'orders': orders, 'status':status_value})
     orders = Order.objects.order_by('-order_place_time').prefetch_related('orderitem_set')
     return render(request, 'management/orders_list.html', {'orders': orders})
     
@@ -100,8 +100,8 @@ def order_detail(request, order_id):
     if request.method == 'POST':
         new_status = request.POST.get('order_status')
         if new_status:
-            order.order_status = new_status
+            order.order_status = new_status        
             order.save()
             return redirect('order_detail', order_id=order.id)
 
-    return render(request, 'management/order_detail.html', {'order': order, 'order_items': order_items})
+    return render(request, 'management/order_detail.html', {'order': order, 'order_items': order_items, 'options': Order.order_status.field.choices})

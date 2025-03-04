@@ -101,7 +101,7 @@ def confirm_order(request):
             del request.session['order_preview']
         
         messages.success(request, 'Your order has been placed successfully!')
-        return redirect('order_detail', order_id=order.id)
+        return redirect('order_detail_customer', order_id=order.id)
     
     return redirect('order_page')
 
@@ -119,3 +119,15 @@ def order_detail(request, order_id):
         'order': order,
         'items': order_items
     })
+
+
+@login_required(login_url='/auth/login')
+def view_orders(request):
+    user = request.user
+    pending = request.GET.get('p')
+    if pending:
+        orders = Order.objects.filter(customer_id=user.id, order_status='pending' if pending=='1' else 'completed').order_by('-order_place_time').prefetch_related('orderitem_set')
+        return render(request, 'customer/orders_list.html', {'orders': orders, 'status':'pending' if pending=='1' else 'completed'})
+    orders = Order.objects.filter(customer_id=user.id,).order_by('-order_place_time').prefetch_related('orderitem_set')
+    return render(request, 'customer/orders_list.html', {'orders': orders})
+    
