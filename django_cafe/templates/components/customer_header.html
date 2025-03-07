@@ -16,7 +16,8 @@
           <a class="nav-link" href="{% url 'order_history' %}">Order History</a>
         </li>
       </ul>
-      <a class="btn btn-light shadow" role="button" href="{% url 'logout' %}">Log Out</a>
+      <a class="btn btn-primary shadow" role="button" href="{% url 'order_page' %}" style="margin-right:5px">New Order</a>
+      <a class="btn btn-outline-danger shadow" role="button" href="{% url 'logout' %}">Log Out</a>
       {%else%}
       <a class="navbar-brand" href="#">Welcome to the CafE! </a>
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">

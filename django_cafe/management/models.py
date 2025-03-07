@@ -29,7 +29,7 @@ class MenuItem(models.Model):
     category = models.IntegerField(default=0, choices=catagories)
     description = models.TextField()
     rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=5)
-    image = models.ImageField(upload_to='images/', null=False, blank=False, default='images/default.png')
+    image = models.ImageField(upload_to='images/', null=False, blank=False, default='images/png.webp')
     
 
     def delete(self, using = None, keep_parents = False):
