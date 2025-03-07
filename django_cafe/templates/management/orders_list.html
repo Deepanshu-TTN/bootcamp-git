@@ -14,12 +14,12 @@
     <button type="submit">View All</button>
 </form>
 <button><a href="{% url 'manage' %}">Manage Menu Items</a></button>
-{%for order in orders %}
-<p>{{order.order_place_time}}</p>
-<p>{{order.order_total_price}}</p>
+{%for order in order_list %}
+<p>{{order.place_time}}</p>
+<p>Rs. {{order.total_price}}</p>
 {% for item in order.orderitem_set.all %}
-<p>{{item.menu_item.item_name}}</p>
-<p>{{item.item_total_pice}}</p>
+<p>{{item.menu_item.name}} x{{item.item_qty}}: Rs. {{item.item_total_price}}</p>
 {%endfor%}
+<br>
     <a href="{% url 'order_detail' order.id %}">view order</a>
 {%endfor%}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.exceptions import ValidationError
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 
 catagories = [
     (0, 'Coffee'),
@@ -13,8 +14,8 @@ catagories = [
 ]
 
 class MenuItem(models.Model):
-    item_name = models.CharField(max_length=100, default='')
-    item_price = models.IntegerField(default=0, validators=(
+    name = models.CharField(max_length=100, default='')
+    price = models.IntegerField(default=0, validators=(
         MaxValueValidator(
             limit_value=10000,
             message='Product too expensive!'),
@@ -23,14 +24,30 @@ class MenuItem(models.Model):
             message='Please set a higher price'
         )
     ))
+
+    last_update = models.DateTimeField(auto_now=True)
     category = models.IntegerField(default=0, choices=catagories)
-    item_description = models.TextField()
-    item_rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=5)
-    item_image = models.ImageField(upload_to='images/', null=False, blank=False, default='images/default.png')
+    description = models.TextField()
+    rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=5)
+    image = models.ImageField(upload_to='images/', null=False, blank=False, default='images/default.png')
+    
 
-
-
+    def delete(self, using = None, keep_parents = False):
+        self.image.delete()
+        return super().delete(using, keep_parents)
+    
     def __str__(self):
-        return self.item_name
+        return self.name
 
 
+@receiver(pre_save, sender=MenuItem)
+def replace_image_from_storage(sender, instance, *args, **kwargs):
+    try:
+        old_instance = MenuItem.objects.get(id=instance.id)
+
+        if old_instance.image != instance.image:
+            storage = instance.image.storage
+            storage.delete(old_instance.image.name)
+
+    except MenuItem.DoesNotExist as e:
+        return f'Cannot delete image: {e}'

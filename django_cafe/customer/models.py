@@ -15,20 +15,23 @@ order_status_bank = [
 ]
 
 class Order(models.Model):
-    customer_id = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
-    order_total_price = models.IntegerField()
-    order_status = models.CharField(max_length=10, choices=order_status_bank, default='pending')
-    order_place_time = models.DateTimeField(auto_now=True, editable=False)
-    order_completed_time = models.DateTimeField(null=True, blank=True)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
+    total_price = models.IntegerField()
+    status = models.CharField(max_length=10, choices=order_status_bank, default='pending')
+    place_time = models.DateTimeField(auto_now_add=True, editable=False)
+    completed_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.customer_id.username}'s order at {self.order_place_time}"
+        return f"{self.customer.username}'s order at {self.place_time}"
 
 
 @receiver(pre_save, sender=Order)
 def check_status(sender, instance, *args, **kwargs):
-    if instance.order_status in ('completed', 'canceled'):
-        instance.order_completed_time = datetime.now()
+    if instance.status in ('completed', 'canceled'):
+        instance.completed_time = datetime.now()
+    
+    else:
+        instance.completed_time = None
 
 
 class OrderItem(models.Model):

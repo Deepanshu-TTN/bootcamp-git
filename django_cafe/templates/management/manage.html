@@ -1,0 +1,10 @@
+{% extends 'components/base.html' %}
+{%block title%}Management Portal{%endblock%}
+{%block content%}
+{% include 'components/management_header.html' with user=user%}
+{% include 'components/search.html' with redirect='manage'%}
+<p>{% if keyword %} keyword: '{{keyword}}' {% endif %}</p>
+<p>{% if max_price or min_price %} price range: less than {{max_price}} {% endif %}</p>
+{%include 'components/items_list.html' with manage=True items=menuitem_list%}
+
+{%endblock%}

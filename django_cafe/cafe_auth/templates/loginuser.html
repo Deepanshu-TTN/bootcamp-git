@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+{%extends 'components/base.html'%}
+{%block title%}login{%endblock%}
+{%block content%}
     <div class="row justify-content-center mt-5">
         <div class="col-md-5">
             <h2>Login</h2>
@@ -28,6 +23,7 @@
                     <label for="password">Password</label>
                     <input type="password" name="password" class="form-control" id="password">
                 </div>
+                <br>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
             <hr>
@@ -36,5 +32,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+{%endblock%}

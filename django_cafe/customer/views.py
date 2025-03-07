@@ -15,16 +15,16 @@ def home(request):
 
     q=Q()
     if search:
-        q &= Q(item_name__contains = search)
+        q &= Q(name__icontains = search)
 
     if max_price:
-        q &= Q(item_price__lt=max_price)
+        q &= Q(price__lt=max_price)
 
     if category:
         q &= Q(category=category)
         
     menu_items = MenuItem.objects.filter(q)
-    return render(request, 'customer/items_list.html', {'items': menu_items, 'user':user})
+    return render(request, 'customer/home.html', {'items': menu_items, 'user': user, 'keyword': search, 'max_price':max_price})
 
 
 @login_required(login_url='/auth/login')
@@ -50,7 +50,7 @@ def place_order(request):
         
         for item_id, quantity in selected_items.items():
             menu_item = get_object_or_404(MenuItem, id=item_id)
-            item_total = menu_item.item_price * quantity
+            item_total = menu_item.price * quantity
             total_price += item_total
             
             order_items.append({
@@ -81,14 +81,14 @@ def confirm_order(request):
             return redirect('order_page')
         print(request.user)
         order = Order.objects.create(
-            customer_id=request.user,
-            order_total_price=order_data['total_price'],
-            order_status='pending'
+            customer=request.user,
+            total_price=order_data['total_price'],
+            status='pending'
         )
         
         for item_id, quantity in order_data['items']:
             menu_item = get_object_or_404(MenuItem, id=item_id)
-            item_total = menu_item.item_price * quantity
+            item_total = menu_item.price * quantity
             
             OrderItem.objects.create(
                 menu_item=menu_item,
@@ -105,14 +105,10 @@ def confirm_order(request):
     
     return redirect('order_page')
 
-@login_required(login_url='/auth/login')
-def order_history(request):
-    orders = Order.objects.filter(customer_id=request.user).order_by('-order_place_time')
-    return render(request, 'customer/order_history.html', {'orders': orders})
 
 @login_required(login_url='/auth/login')
 def order_detail(request, order_id):
-    order = get_object_or_404(Order, id=order_id, customer_id=request.user)
+    order = get_object_or_404(Order, id=order_id, customer=request.user)
     order_items = OrderItem.objects.filter(order_instance=order)
     
     return render(request, 'customer/order_detail.html', {
@@ -124,10 +120,5 @@ def order_detail(request, order_id):
 @login_required(login_url='/auth/login')
 def view_orders(request):
     user = request.user
-    pending = request.GET.get('p')
-    if pending:
-        orders = Order.objects.filter(customer_id=user.id, order_status='pending' if pending=='1' else 'completed').order_by('-order_place_time').prefetch_related('orderitem_set')
-        return render(request, 'customer/orders_list.html', {'orders': orders, 'status':'pending' if pending=='1' else 'completed'})
-    orders = Order.objects.filter(customer_id=user.id,).order_by('-order_place_time').prefetch_related('orderitem_set')
+    orders = Order.objects.filter(customer=user).order_by('-place_time').prefetch_related('orderitem_set')
     return render(request, 'customer/orders_list.html', {'orders': orders})
-    

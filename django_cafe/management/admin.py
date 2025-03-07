@@ -16,7 +16,7 @@ def download_csv(model_admin, request, queryset):
     headers = ['Item', 'Price', 'Rating']
     writer.writerow(headers)
 
-    data = [[model.item_name, model.item_price, model.item_rating] for model in queryset]
+    data = [[model.name, model.price, model.rating] for model in queryset]
     writer.writerows(data)
 
     return response
@@ -70,8 +70,8 @@ class MenuCategoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ('item_name', 'item_price', 'category', 'item_rating')
-    search_fields = ('item_name',)
+    list_display = ('name', 'price', 'category', 'rating')
+    search_fields = ('name',)
     list_filter = (MenuItemPriceFilter, MenuCategoryFilter)
     actions=[download_csv]
     

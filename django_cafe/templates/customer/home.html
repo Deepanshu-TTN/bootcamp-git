@@ -1,0 +1,13 @@
+{% extends 'components/base.html' %}
+{% block title%}Home{% endblock %}
+{% block content %}
+{% include 'components/customer_header.html' with user=user%}
+<button type="button"><a href="{% url 'order_page' %}">
+    Order Item
+  </a>
+  </button>
+{% include 'components/search.html' with redirect='home'%}
+<p>{% if keyword %} keyword: '{{keyword}}' {% endif %}</p>
+<p>{% if max_price or min_price %} price range: less than {{max_price}} {% endif %}</p>
+{%include 'components/items_list.html' with manage=False %}
+{%endblock%}

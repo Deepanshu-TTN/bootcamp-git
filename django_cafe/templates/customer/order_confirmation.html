@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <form action="{% url 'order_confirmation' %}" method="post">
+{% extends 'components/base.html' %}
+{%block title%}Confirm Order {%endblock%}
+{%block content%}
+{% include 'components/customer_header.html' with user=user%}
+<form action="{% url 'order_confirmation' %}" method="post">
         {% csrf_token %} 
         {% for item in items %}
-        <h2>{{item.menu_item.item_name}}</h2>
+        <h2>{{item.menu_item.name}}</h2>
         <p>x {{item.quantity}}</p>
         <h3>
             Rs. {{item.item_total}}
@@ -18,5 +14,4 @@
         <h1>Rs. {{ total_price}}</h1>
         <button type="submit"> conirm</button>
     </form>
-</body>
-</html>
+{%endblock%}

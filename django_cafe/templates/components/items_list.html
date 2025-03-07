@@ -1,0 +1,45 @@
+<table width="100%">
+    <tr>
+      {% for item in items %}
+        {% if forloop.counter0|divisibleby:3 and not forloop.first %}
+          </tr><tr>
+        {% endif %}
+        <td width="33%" valign="top">
+          <table >
+            <tr>
+              <td height="50"><h2>{{item.name|truncatechars:20}}</h2></td>
+            </tr>
+            <tr>
+              <td height="100"><img src="{{item.image.url}}" alt="{{item.name}}" height="100" width="100"></td>
+
+            </tr>
+            <tr>
+              <td height="30"><strong>{{item.get_category_display}}</strong></td>
+            </tr>
+            <tr>
+              <td height="30"><strong>Price:</strong> Rs. {{item.price}}</td>
+            </tr>
+            <tr>
+              <td height="70"><strong>Description:</strong> {{item.description|truncatechars:50}}</td>
+            </tr>
+            <tr>
+              <td height="30"><strong>Rating:</strong> {{item.rating}} &#9733;</td>
+            </tr>
+            {% if manage %}
+            <tr>
+              <td>
+                <form method="POST" action="{% url 'remove' item.id %}">
+                  {% csrf_token %} 
+                  <button type="submit" id="Remove">Remove</button>
+                </form>
+                <form method="get" action="{% url 'edit' item.id %}">
+                  <button type="submit" id="Edit">edit</button>
+                </form>
+              </td>
+            </tr>
+            {%endif%}
+          </table>
+        </td>
+      {% endfor %}
+    </tr>
+  </table>

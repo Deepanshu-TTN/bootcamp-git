@@ -1,0 +1,18 @@
+<div class="container mt-4">
+  <h1>Shop items: </h1>
+  <form action="{% url redirect %}" method="GET" class="d-flex">
+    <input type="search" name="search" placeholder="Search.." aria-label="Search" class="form-control me-4 ">
+    <input type="number" name="lt" placeholder="Max Price.." aria-label="Price" class="form-control input-number me-4 w-25" min="1" max="10">
+    <select name="category" class="me-4 w-25">
+      <option value="" selected>All</option>
+      <option value="0">Coffee</option>
+      <option value="1">Tea</option>
+      <option value="2">Cookies</option>
+      <option value="3">Muffins</option>
+      <option value="4">Cakes & Cupcakes</option>
+      <option value="5">Pastries</option>
+      <option value="6">Light Bites</option>
+    </select>
+    <button type="submit" class="btn btn-dark me-4 w-10">Go</button>
+  </form>
+</div>

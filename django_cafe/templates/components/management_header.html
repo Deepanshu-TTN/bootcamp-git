@@ -1,0 +1,12 @@
+<div>
+    <h2>Hello {{ user }} <a href="{% url 'logout' %}" style="font-size: small;">Logout</a></h2>
+  </div>
+    <button type="button"><a href="{% url 'additem' %}">
+      Add item
+    </a>
+  </button>
+  <button type="button"><a href="{% url 'orders_list' %}">
+    View orders
+  </a>
+  <button><a href="{% url 'home' %}">Home</a></button>
+</button>
