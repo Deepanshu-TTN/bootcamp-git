@@ -1,26 +1,45 @@
-<button><a href="{% url 'manage' %}">Manage Page</a></button>
-<button><a href="{% url 'orders_list' %}">Orders Page</a></button>
+{% extends 'components/base.html' %}
+{% block title %}Management Portal{% endblock %}
 
-<p>Order Placed Time: {{ order.place_time }}</p>
-<p>Total Price: Rs. {{ order.total_price }}</p>
+{% block content %}
 
-<h3>Order Items:</h3>
-{% for item in order_items %}
-    <p>Item: {{ item.menu_item.item_name }} x{{item.item_qty}}</p>
-    <p>Item Total Price: Rs. {{ item.item_total_price }}</p>
-    
+{% include 'components/management_header.html' with user=user %}
 
-{% endfor %}
+<div class="container mt-4">
+    <h1 class="mb-4">Order Management</h1>
 
-<form action="{% url 'order_detail' order.id %}" method="post">
-    {% csrf_token %}
-    <label for="order_status">Order Status:</label>
-    <select name="order_status" id="order_status">
-        {%for option in options%}
-        <option value="{{option.0}}" {% if order.status == option.0 %}selected{% endif %}>{{option.1}}</option>
-        {% endfor %}
+    <div class="mb-3">
+        <a href="{% url 'manage' %}" class="btn btn-primary">Manage Page</a>
+        <a href="{% url 'orders_list' %}" class="btn btn-secondary">Orders Page</a>
+    </div>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Order Details</h5>
+            <p class="card-text">Order Placed Time: {{ order.place_time }}</p>
+            
+            <h6 class="mt-4">Order Items:</h6>
+            {% for item in order_items %}
+            <p><b>{{ item.menu_item.name }}</b> x{{ item.item_qty }} - Rs. {{ item.item_total_price }}</p>
+            <p></p>
+            {% endfor %}
+            <br>
+            <p class="card-text text-bold"><b>Total Price: </b>Rs. {{ order.total_price }}</p>
+        </div>
+    </div>
 
-    </select>
-    <button type="submit">Update Status</button>
-</form>
+    <form action="{% url 'order_detail' order.id %}" method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="d-flex align-items-center justify-content-between">
+            <label for="order_status">Order Status:</label>
+            <select name="order_status" id="order_status" class="form-control w-75">
+                {% for option in options %}
+                    <option value="{{ option.0 }}" {% if order.status == option.0 %}selected{% endif %}>{{ option.1 }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-success">Update Status</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

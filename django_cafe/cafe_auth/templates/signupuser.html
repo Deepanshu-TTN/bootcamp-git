@@ -16,10 +16,13 @@
                 {% for field in form  %}
                 <div class="form-group">
                     <label class=" " for="{{field.id_for_label}}">{{field.label}}</label>
+                    <br>
                     {{field}}
-
+                    
                     {% if field.errors %}
-                        <small style='color: #f47;'>{{field.errors.0}}</small>
+                    <small style='color: #f47;'>{{field.errors.0}}</small>
+                    {% else %}
+                    <small style="color:#0d6efd">{{field.help_text}}</small>
                     {% endif %}
                 </div>
                 <br>

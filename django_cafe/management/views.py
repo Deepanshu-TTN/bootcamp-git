@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.urls import reverse_lazy, reverse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView, TemplateView
+from django.db.models import Sum, Avg
 from django.db.models import Q
-from customer.models import Order
+from customer.models import Order, OrderItem
 from .models import MenuItem
 from .forms import MenuItemForm
+import json
 
 '''
 def decorator_is_staff(func):
@@ -37,6 +39,7 @@ class CreateMenuItem(CheckStaffMixin, CreateView):
 
 class ManageListView(CheckStaffMixin, ListView):
     model = MenuItem
+    paginate_by = 4
     ordering = '-last_update'
     template_name = 'management/manage.html'
     
@@ -67,24 +70,24 @@ class EditMenuItem(CheckStaffMixin, UpdateView):
     success_url = reverse_lazy('manage')
 
 
-class DeleteMenuItem(CheckStaffMixin, DeleteView):
+class DeleteMenuItem(CheckStaffMixin, PermissionRequiredMixin, DeleteView):
     model = MenuItem
     pk_url_kwarg = 'itemid'
     success_url = reverse_lazy('manage')
+    permission_required = 'can_delete_menuitems'
+    
 
     
 class ManageOrdersListView(CheckStaffMixin, ListView):
     model = Order
     template_name = 'management/orders_list.html'
-    ordering = '-place_time'
-
     
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = Order.with_items.all()
         status_value = self.request.GET.get('status')
         if status_value:
             qs.filter(status=status_value)
-        return qs.prefetch_related('orderitem_set')
+        return qs
     
 
 class ViewOrderDetail(CheckStaffMixin, DetailView):
@@ -109,6 +112,55 @@ class ViewOrderDetail(CheckStaffMixin, DetailView):
             order.save()
 
         return redirect(reverse('order_detail', args=(order.id,)))
+    
+
+class OrderStatisticsView(CheckStaffMixin, TemplateView):
+    template_name = 'management/order_statistics.html'    
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        all_orders = Order.objects.all()
+        context['total_orders'] = all_orders.count()
+        context['total_revenue'] = all_orders.aggregate(total=Sum('total_price'))['total'] or 0
+        context['average_order_value'] = all_orders.aggregate(avg=Avg('total_price'))['avg'] or 0
+
+        top_items = OrderItem.objects.values(
+            'menu_item__id', 
+            'menu_item__name'
+        ).annotate(
+            count=Sum('item_qty'),
+            revenue=Sum('item_total_price')
+        ).order_by('-revenue')[:10]
+        
+        context['top_items'] = top_items
+        
+        # completed_orders = all_orders.exclude(completed_time=None)
+        # if completed_orders.exists():
+        #     time_diff_expr = ExpressionWrapper(
+        #         F('completed_time') - F('place_time'),
+        #         output_field=fields.DurationField()
+        #     )
+        #     avg_timedelta = completed_orders.annotate(
+        #         time_diff=time_diff_expr
+        #     ).aggregate(avg_time=Avg('time_diff'))['avg_time']
+            
+        #     if avg_timedelta:
+        #         total_seconds = avg_timedelta.total_seconds()
+        #         hours = int(total_seconds // 3600)
+        #         minutes = int((total_seconds % 3600) // 60)
+        #         seconds = int(total_seconds % 60)
+                
+        #         if hours > 0:
+        #             context['avg_completion_time'] = f"{hours}h {minutes}m"
+        #         else:
+        #             context['avg_completion_time'] = f"{minutes}m {seconds}s"
+        #     else:
+        #         context['avg_completion_time'] = "N/A"
+        # else:
+        #     context['avg_completion_time'] = "N/A"
+        
+        return context
 
 
 

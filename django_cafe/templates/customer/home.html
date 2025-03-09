@@ -3,7 +3,12 @@
 {% block content %}
 {% include 'components/customer_header.html' with user=user%}
 {% include 'components/search.html' with redirect='home'%}
-<p>{% if keyword %} keyword: '{{keyword}}' {% endif %}</p>
-<p>{% if max_price or min_price %} price range: less than {{max_price}} {% endif %}</p>
+{% if keyword %}
+{% if max_price or min_price %} 
+<div class="container py-5">
+    <p> keyword: '{{keyword}}' {% endif %}</p>
+    <p>price range: less than {{max_price}} </p>
+</div>
+{% endif %}
 {%include 'components/items_list.html' with manage=False %}
 {%endblock%}

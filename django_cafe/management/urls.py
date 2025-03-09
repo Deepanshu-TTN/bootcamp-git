@@ -8,4 +8,5 @@ urlpatterns = [
     path('edit/<int:itemid>', views.EditMenuItem.as_view(), name='edit'),
     path('orders-list/', views.ManageOrdersListView.as_view(), name='orders_list'),
     path('order/<int:order_id>', views.ViewOrderDetail.as_view(), name='order_detail'),
+    path('stats/', views.OrderStatisticsView.as_view(), name='stats')
 ]

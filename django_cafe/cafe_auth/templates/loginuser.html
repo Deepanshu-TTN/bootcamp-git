@@ -15,15 +15,17 @@
             {% endif %}
             <form method="POST">
                 {% csrf_token %}
+                {% for field in form %}
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" name="username" class="form-control" id="username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" name="password" class="form-control" id="password">
+                    <label for="{{field.id_for_label}}">{{field.label}}</label><br>
+                    {{field}}
                 </div>
                 <br>
+                {% endfor %}
+                
+                <small style="color: #f47">
+                    {{form.non_field_errors.0}}
+                </small><br>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
             <hr>

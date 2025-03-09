@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+{% block title %} CAFE ADMIN PANEL {% endblock %}
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">Welcome to the Cafe Admin Panel </a>
+    <small>
+        <a style="color: #e1e1e1" href="{%url 'home'%}"> Visit the main site</a>
+    </small>
+</div> 
+{% endblock %}

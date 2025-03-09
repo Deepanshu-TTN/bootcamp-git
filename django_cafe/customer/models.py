@@ -14,12 +14,24 @@ order_status_bank = [
     ('canceled', 'Canceled')
 ]
 
+class OrderOrderItemManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().order_by('-place_time').prefetch_related('orderitem_set')
+    
+    def get_orders_of(self, user):
+        return super().get_queryset().filter(customer=user).order_by('-place_time').prefetch_related('orderitem_set')
+
+
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
     total_price = models.IntegerField()
     status = models.CharField(max_length=10, choices=order_status_bank, default='pending')
     place_time = models.DateTimeField(auto_now_add=True, editable=False)
     completed_time = models.DateTimeField(null=True, blank=True)
+
+    objects = models.Manager()
+
+    with_items = OrderOrderItemManager()
 
     def __str__(self):
         return f"{self.customer.username}'s order at {self.place_time}"

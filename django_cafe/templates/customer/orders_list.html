@@ -11,9 +11,10 @@
     Viewing all orders
 </h1>
 {% endif %}
-<form action="{%url 'orders_list'%}">
-    <button type="submit" name="p" value="0">View Completed</button>
-    <button type="submit" name="p" value="1">View Pending</button>
+<form action="{%url 'order_history'%}">
+    <button type="submit" name="status" value="completed">View Completed</button>
+    <button type="submit" name="status" value="pending">View Pending</button>
+    <button type="submit" name="status" value="canceled">View Cancelled</button>
     <button type="submit">View All</button>
 </form>
 {%for order in orders %}

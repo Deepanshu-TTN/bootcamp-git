@@ -1,0 +1,79 @@
+{% extends 'components/base.html' %}
+{% block title %}Order Statistics{% endblock %}
+
+{% block content %}
+
+{% include 'components/management_header.html' with user=user%}
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Order Statistics Dashboard</h1>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <h2 class="display-4">{{ total_orders }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-outline text-gray h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <h2 class="display-4">₹{{ total_revenue }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Avg Order Value</h5>
+                    <h2 class="display-4">₹{{ average_order_value|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        {% comment %} <div class="col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Avg Completion Time</h5>
+                    <h2 class="display-4">{{ avg_completion_time }}</h2>
+                </div>
+            </div>
+        </div> {% endcomment %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    Top Selling Items
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in top_items %}
+                                <tr>
+                                    <td>{{ item.menu_item__name }}</td>
+                                    <td>{{ item.count }}</td>
+                                    <td>₹{{ item.revenue }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

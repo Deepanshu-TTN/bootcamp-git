@@ -7,6 +7,12 @@ from django.db.models.signals import pre_save
 
 
 class MenuItem(models.Model):
+    
+    class Meta:
+        permissions = [
+            ("can_delete_menuitems", "Can Delete Menu Items"),
+        ]
+
     _catagories = [
         (0, 'Coffee'),
         (1, 'Tea'),
@@ -35,6 +41,7 @@ class MenuItem(models.Model):
     rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=5)
     image = models.ImageField(upload_to='images/', null=False, blank=False, default=_default_image)
     
+
 
     def delete(self, using = None, keep_parents = False):
         if self.image.name != self._default_image:

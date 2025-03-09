@@ -4,6 +4,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from management.models import MenuItem
 from .models import Order, OrderItem
+import logging
+
+order_logger = logging.getLogger('orders')
 
 
 def home(request):
@@ -85,6 +88,9 @@ def confirm_order(request):
             total_price=order_data['total_price'],
             status='pending'
         )
+
+        log_items = list()
+        categories_ordered = set()
         
         for item_id, quantity in order_data['items']:
             menu_item = get_object_or_404(MenuItem, id=item_id)
@@ -96,6 +102,24 @@ def confirm_order(request):
                 order_instance=order,
                 item_total_price=item_total
             )
+
+            log_items.append({
+                'item_name': menu_item.name,
+                'item_id': menu_item.id,
+                'category': menu_item.get_category_display(),
+                'quantity': quantity,
+                'price': menu_item.price,
+            })
+            categories_ordered.add(menu_item.get_category_display())
+
+        order_logger.info(
+            f"Order placed - ID: {order.id} | User: {request.user.username} | "
+            f"Time: {order.place_time.strftime('%Y-%m-%d %H:%M:%S')} | "
+            f"Categories: {', '.join(categories_ordered)} | "
+            f"Total: {order_data['total_price']} | "
+            f"Items: {log_items}"
+        )
+        
         
         if 'order_preview' in request.session:
             del request.session['order_preview']
@@ -120,5 +144,12 @@ def order_detail(request, order_id):
 @login_required(login_url='/auth/login')
 def view_orders(request):
     user = request.user
-    orders = Order.objects.filter(customer=user).order_by('-place_time').prefetch_related('orderitem_set')
+    # previously had to write all of this
+    # orders = Order.objects.filter(customer=user).order_by('-place_time').prefetch_related('orderitem_set')
+    status_value = request.GET.get('status')
+    q = Q()
+    if status_value:
+        q &= Q(status__exact=status_value)
+        
+    orders = Order.with_items.get_orders_of(user).filter(q)
     return render(request, 'customer/orders_list.html', {'orders': orders})
