@@ -1,0 +1,11 @@
+<div class="container mt-5">
+    <h1>Upload Excel File</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="excel_file">Select Excel file</label>
+            <input type="file" class="form-control-file" id="excel_file" name="excel_file" required>
+        </div> <br>
+        <button type="submit" class="btn btn-primary mt-3">Read</button>
+    </form>
+</div>

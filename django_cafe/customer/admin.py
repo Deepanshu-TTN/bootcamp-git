@@ -4,11 +4,13 @@ from django.contrib.auth.models import User
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['get_user_title', 'total_price', 'status', 'place_time', 'completed_time' ]
+    list_display = ['id','get_user_title', 'total_price', 'status', 'place_time', 'completed_time' ]
     search_fields = ['customer__username']
 
     def get_user_title(self, obj):
-        return obj.customer.username
+        if obj.customer:
+            return obj.customer.username
+        return "Offline Order"
     get_user_title.short_description = "Ordered By"
 
 

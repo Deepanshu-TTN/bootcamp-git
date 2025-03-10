@@ -6,8 +6,12 @@ LOGGER_CONFIG = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
+        'order_log': {
             'format': '{levelname} - {name} - {message}',
+            'style':'{'
+        },
+        'item_log': {
+            'format': '{levelname} - {message}',
             'style':'{'
         },
     },
@@ -16,12 +20,23 @@ LOGGER_CONFIG = {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'logs/orders.log',
-            'formatter': 'verbose'
+            'formatter': 'order_log'
+        },
+        'items_file':{
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/items.log',
+            'formatter': 'item_log'
         }
     },
     'loggers': {
         'orders':{
             'handlers': ['orders_file'],
+            'level': 'INFO',
+            'propogate': False
+        },
+        'items': {
+            'handlers': ['items_file'],
             'level': 'INFO',
             'propogate': False
         }

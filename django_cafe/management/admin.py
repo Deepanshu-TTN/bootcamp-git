@@ -70,7 +70,7 @@ class MenuCategoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'category', 'rating')
+    list_display = ('id', 'name', 'price', 'category', 'rating')
     search_fields = ('name',)
     list_filter = (MenuItemPriceFilter, MenuCategoryFilter)
     actions=[download_csv]

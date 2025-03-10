@@ -4,7 +4,7 @@
 {% block content %}
 
 {% include 'components/management_header.html' with user=user%}
-<div class="container-fluid mt-4">
+<div class="container container-fluid mt-4 py-5">
     <h1 class="mb-4">Order Statistics Dashboard</h1>
 
     <div class="row mb-3">
@@ -32,14 +32,6 @@
                 </div>
             </div>
         </div>
-        {% comment %} <div class="col-md-3">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Avg Completion Time</h5>
-                    <h2 class="display-4">{{ avg_completion_time }}</h2>
-                </div>
-            </div>
-        </div> {% endcomment %}
     </div>
 
     <div class="row">
@@ -61,7 +53,11 @@
                             <tbody>
                                 {% for item in top_items %}
                                 <tr>
-                                    <td>{{ item.menu_item__name }}</td>
+                                    <td>
+                                        <a class="text-dark text-decoration-none" href="{% url 'edit' item.menu_item__id%}" >
+                                        {{ item.menu_item__name }}
+                                        </a>
+                                    </td>
                                     <td>{{ item.count }}</td>
                                     <td>₹{{ item.revenue }}</td>
                                 </tr>
@@ -77,3 +73,4 @@
 
 
 {% endblock %}
+

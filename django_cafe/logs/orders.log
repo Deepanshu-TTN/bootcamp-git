@@ -1,1 +1,3 @@
 INFO - orders - Order placed - ID: 17 | User: admin | Time: 2025-03-09 10:57:48 | Categories: Cookies | Total: 110 | Items: [{'item_name': 'choco cookie', 'item_id': 21, 'category': 'Cookies', 'quantity': 2, 'price': 55}]
+INFO - orders - Order placed - ID: 19 | User: 696969 | Time: 2025-03-10 05:32:24 | Categories: Cakes & Cupcakes | Total: 250 | Items: [{'item_name': 'Blueberry Cheesecake', 'item_id': 18, 'category': 'Cakes & Cupcakes', 'quantity': 1, 'price': 250}]
+INFO - orders - Order placed - ID: 21 | User: 696969 | Time: 2025-03-10 05:47:43 | Categories: Coffee | Total: 700 | Items: [{'item_name': 'chudgyi chudgyi', 'item_id': 39, 'category': 'Coffee', 'quantity': 7, 'price': 100}]

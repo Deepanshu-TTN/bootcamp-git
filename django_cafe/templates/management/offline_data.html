@@ -1,0 +1,27 @@
+{% extends 'components/base.html' %}
+{%block title%}Add data{%endblock%}
+
+{%block content%}
+
+{% include 'components/management_header.html' with user=user%}
+<div class="container py-5">
+
+    <div class="mb-3">
+        <form method='POST' enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="excel_file" class="form-label">Upload data:</label>
+            <input type="file" class="form-control" id="excel_file" name="excel_file" required>
+            <div id="fileHelpId" class="form-text">Add order-items data from store logs</div><br>
+            <div class="d-grid gap-2" style="width: 5rem;">
+                <button type="submit" class="btn btn-primary">
+                    Submit
+                </button>
+                
+            </div>
+            
+        </form>
+    </div>
+    
+</div>
+
+{%endblock%}

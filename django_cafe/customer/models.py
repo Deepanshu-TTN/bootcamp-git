@@ -23,8 +23,8 @@ class OrderOrderItemManager(models.Manager):
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
-    total_price = models.IntegerField()
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False, null=True)
+    total_price = models.IntegerField(default=0)
     status = models.CharField(max_length=10, choices=order_status_bank, default='pending')
     place_time = models.DateTimeField(auto_now_add=True, editable=False)
     completed_time = models.DateTimeField(null=True, blank=True)
@@ -34,7 +34,7 @@ class Order(models.Model):
     with_items = OrderOrderItemManager()
 
     def __str__(self):
-        return f"{self.customer.username}'s order at {self.place_time}"
+        return f"{self.customer.username if self.customer else 'Offline Order'}'s order at {self.place_time}"
 
 
 @receiver(pre_save, sender=Order)
@@ -48,7 +48,7 @@ def check_status(sender, instance, *args, **kwargs):
 
 class OrderItem(models.Model):
     menu_item = models.ForeignKey(MenuItem, on_delete=models.DO_NOTHING, db_constraint=False)
-    item_qty = models.IntegerField(validators=[
+    item_qty = models.IntegerField(default=0, validators=[
         MaxValueValidator(
             limit_value=10,
             message='Cannot place more than 10 of the same items!'),

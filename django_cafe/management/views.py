@@ -1,14 +1,14 @@
-from django.shortcuts import render, redirect
+import openpyxl
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView, TemplateView
-from django.db.models import Sum, Avg
-from django.db.models import Q
+from django.db.models import Sum, Avg, Q
+from django.http import Http404
 from customer.models import Order, OrderItem
 from .models import MenuItem
 from .forms import MenuItemForm
-import json
 
 '''
 def decorator_is_staff(func):
@@ -133,34 +133,57 @@ class OrderStatisticsView(CheckStaffMixin, TemplateView):
             revenue=Sum('item_total_price')
         ).order_by('-revenue')[:10]
         
-        context['top_items'] = top_items
-        
-        # completed_orders = all_orders.exclude(completed_time=None)
-        # if completed_orders.exists():
-        #     time_diff_expr = ExpressionWrapper(
-        #         F('completed_time') - F('place_time'),
-        #         output_field=fields.DurationField()
-        #     )
-        #     avg_timedelta = completed_orders.annotate(
-        #         time_diff=time_diff_expr
-        #     ).aggregate(avg_time=Avg('time_diff'))['avg_time']
-            
-        #     if avg_timedelta:
-        #         total_seconds = avg_timedelta.total_seconds()
-        #         hours = int(total_seconds // 3600)
-        #         minutes = int((total_seconds % 3600) // 60)
-        #         seconds = int(total_seconds % 60)
-                
-        #         if hours > 0:
-        #             context['avg_completion_time'] = f"{hours}h {minutes}m"
-        #         else:
-        #             context['avg_completion_time'] = f"{minutes}m {seconds}s"
-        #     else:
-        #         context['avg_completion_time'] = "N/A"
-        # else:
-        #     context['avg_completion_time'] = "N/A"
-        
+        context['top_items'] = top_items        
         return context
+
+
+def upload_order_data(request):
+    if request.method == 'POST':
+        excel_file = request.FILES['excel_file']
+        
+        wb = openpyxl.load_workbook(excel_file)
+        worksheet = wb.active
+
+        for row in worksheet.iter_rows(values_only=True):
+            try:
+                item_id = int(row[0])
+                print(item_id)
+
+                item = get_object_or_404(MenuItem, id=item_id)
+                quantity = int(row[1])
+
+                #assuming related data is already stored and
+                #we need to add items to an old order
+                order_id = int(row[2])
+                order, _ = Order.objects.get_or_create(
+                    id=order_id,
+                    defaults={
+                        'id': order_id,
+                        'status': 'completed'
+                    })
+
+                order_item, _ = OrderItem.objects.get_or_create(
+                    menu_item=item,
+                    order_instance=order,
+                )
+
+                order_item.item_qty += quantity
+                order_item.item_total_price = order_item.item_qty * item.price
+                order.total_price += order_item.item_total_price
+                order_item.save()
+                order.save()
+
+            except Http404:
+                print(f'could not add data for {row}')
+                pass
+
+        
+        return redirect('orders_list')
+    
+    return render(request, 'management/offline_data.html')
+
+        
+
 
 
 
