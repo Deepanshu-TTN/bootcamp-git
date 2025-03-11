@@ -3,11 +3,14 @@
 {% block content %}
 {% include 'components/customer_header.html' with user=user%}
 {% include 'components/search.html' with redirect='home'%}
-{% if keyword %}
-{% if max_price or min_price %} 
-<div class="container py-5">
-    <p> keyword: '{{keyword}}' {% endif %}</p>
-    <p>price range: less than {{max_price}} </p>
+{% if keyword or max_price %}
+<div class="container">
+    {% if keyword %}
+    <span> keyword: '{{keyword}}'</span>
+    {% endif %}
+    {% if max_price or min_price %} 
+    <span>price range: less than {{max_price}} </span>
+    {% endif %}
 </div>
 {% endif %}
 {%include 'components/items_list.html' with manage=False %}

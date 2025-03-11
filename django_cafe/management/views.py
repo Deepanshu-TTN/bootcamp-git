@@ -4,7 +4,7 @@ from django.http import HttpResponseForbidden
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView, TemplateView
-from django.db.models import Sum, Avg, Q
+from django.db.models import Sum, Avg, Q, F
 from django.http import Http404
 from customer.models import Order, OrderItem
 from .models import MenuItem
@@ -125,15 +125,32 @@ class OrderStatisticsView(CheckStaffMixin, TemplateView):
         context['total_revenue'] = all_orders.aggregate(total=Sum('total_price'))['total'] or 0
         context['average_order_value'] = all_orders.aggregate(avg=Avg('total_price'))['avg'] or 0
 
+        # select final.name, sum(item_total_price) as revenue from 
+        # (select mgmt.name, cust.item_total_price from management_menuitem as mgmt 
+        # join customer_orderitem cust on cust.menu_item_id = mgmt.id)
+        # as final group by final.name order by revenue desc limit 10;
         top_items = OrderItem.objects.values(
             'menu_item__id', 
             'menu_item__name'
         ).annotate(
-            count=Sum('item_qty'),
-            revenue=Sum('item_total_price')
+            count = Sum('item_qty'),
+            revenue = Sum('item_total_price')
+        ).order_by('-revenue')[:10]
+        context['top_items'] = top_items   
+
+        # select management_menuitem.category, sum(customer_orderitem.item_total_price) as rev 
+        # from management_menuitem join customer_orderitem 
+        # on customer_orderitem.menu_item_id = management_menuitem.id 
+        # group by management_menuitem.category order by rev desc;
+        top_categories = OrderItem.objects.values(
+            'menu_item__category',
+        ).annotate(
+            category = MenuItem._category_case_statement,
+            revenue = Sum('item_total_price'),
         ).order_by('-revenue')[:10]
         
-        context['top_items'] = top_items        
+        context['top_categories']=top_categories
+
         return context
 
 

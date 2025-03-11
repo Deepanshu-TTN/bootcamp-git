@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
+from django.db.models import Case, When, Value
 
 
 
@@ -22,6 +23,16 @@ class MenuItem(models.Model):
         (5, 'Pastries'),
         (6, 'Light Bites'),
     ]
+    _category_case_statement = Case(
+    When(menu_item__category=0, then=Value('Coffee')),
+    When(menu_item__category=1, then=Value('Tea')),
+    When(menu_item__category=2, then=Value('Cookies')),
+    When(menu_item__category=3, then=Value('Muffins')),
+    When(menu_item__category=4, then=Value('Cakes & Cupcakes')),
+    When(menu_item__category=5, then=Value('Pastries')),
+    When(menu_item__category=6, then=Value('Light Bites')),
+    output_field=models.CharField(),
+)
     _default_image = 'images/png.webp'
 
     name = models.CharField(max_length=100, default='')

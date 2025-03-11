@@ -34,8 +34,36 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    Top Categories
+                </div>
+                <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <th>Category</th>
+                                <th>Revenue</th>
+                            </thead>
+                            <tbody>
+                                {% for category in top_categories %}
+                                <tr>
+                                    <td>
+                                        {{category.category}}
+                                    </td>
+                                    <td>
+                                        {{category.revenue}}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
                     Top Selling Items

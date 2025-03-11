@@ -1,23 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Menu Item</title>
-</head>
-<body>
-    <div>
-        <h2>Edit menu item!</h2>
+{% extends 'components/base.html' %}
+{% block title %}Add data{% endblock %}
+
+{% block content %}
+
+{% include 'components/management_header.html' with user=user %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <h2>Edit Menu Item!</h2>
     </div>
-    <div>
-        {% if error %}
-        <div>{{ error }}</div>
-        {% endif %}
+</div>
+
+<div>
+    {% if error %}
+    <div class="messages">
+        <div class="alert alert-danger">{{ error }}</div>
     </div>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit">
-    </form>
-</body>
-</html>
+    {% endif %}
+</div>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <br>
+                {{ field }}
+                {% if field.errors %}
+                <small class="text-danger">{{ field.errors.0 }}</small>
+                {% else %}
+                <small class="text-muted">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-dark">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
