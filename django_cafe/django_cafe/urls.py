@@ -18,12 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('customer.urls')),
     path('manage/', include('management.urls')),
     path('auth/', include('cafe_auth.urls')),
+    path('api/', include('api.urls')),
 ]
 
 if settings.DEBUG:

@@ -64,12 +64,12 @@ def place_order(request):
         
         request.session['order_preview'] = {
             'items': [(item['menu_item'].id, item['quantity']) for item in order_items],
-            'total_price': total_price
+            'total_price': str(total_price)
         }
         
         return render(request, 'customer/order_confirmation.html', {
             'items': order_items,
-            'total_price': total_price
+            'total_price': str(total_price)
         })
     
     return redirect('order_page')
@@ -83,9 +83,10 @@ def confirm_order(request):
             messages.error(request, 'Your order session has expired. Please start again.')
             return redirect('order_page')
         print(request.user)
+        total_price = float(order_data['total_price'])
         order = Order.objects.create(
             customer=request.user,
-            total_price=order_data['total_price'],
+            total_price=total_price,
             status='pending'
         )
 
@@ -116,7 +117,7 @@ def confirm_order(request):
             f"Order placed - ID: {order.id} | User: {request.user.username} | "
             f"Time: {order.place_time.strftime('%Y-%m-%d %H:%M:%S')} | "
             f"Categories: {', '.join(categories_ordered)} | "
-            f"Total: {order_data['total_price']} | "
+            f"Total: {total_price} | "
             f"Items: {log_items}"
         )
         

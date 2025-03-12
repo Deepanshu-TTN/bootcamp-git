@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from management.models import MenuItem
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from datetime import datetime
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -24,7 +24,7 @@ class OrderOrderItemManager(models.Manager):
 
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False, null=True)
-    total_price = models.IntegerField(default=0)
+    total_price = models.DecimalField(default=0, decimal_places=2, max_digits=10)
     status = models.CharField(max_length=10, choices=order_status_bank, default='pending')
     place_time = models.DateTimeField(auto_now_add=True, editable=False)
     completed_time = models.DateTimeField(null=True, blank=True)
@@ -40,7 +40,7 @@ class Order(models.Model):
 @receiver(pre_save, sender=Order)
 def check_status(sender, instance, *args, **kwargs):
     if instance.status in ('completed', 'canceled'):
-        instance.completed_time = datetime.now()
+        instance.completed_time = timezone.now()
     
     else:
         instance.completed_time = None
@@ -58,4 +58,4 @@ class OrderItem(models.Model):
         )
     ])
     order_instance = models.ForeignKey(Order, on_delete=models.CASCADE)
-    item_total_price = models.DecimalField(default=0, decimal_places=2, max_digits=6)
+    item_total_price = models.DecimalField(default=0, decimal_places=2, max_digits=10)

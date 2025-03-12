@@ -36,7 +36,7 @@ class MenuItem(models.Model):
     _default_image = 'images/png.webp'
 
     name = models.CharField(max_length=100, default='')
-    price = models.IntegerField(default=0, validators=(
+    price = models.DecimalField(default=0, decimal_places=2, max_digits=10, validators=(
         MaxValueValidator(
             limit_value=10000,
             message='Product too expensive!'),

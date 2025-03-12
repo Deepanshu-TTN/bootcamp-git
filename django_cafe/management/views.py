@@ -164,8 +164,6 @@ def upload_order_data(request):
         for row in worksheet.iter_rows(values_only=True):
             try:
                 item_id = int(row[0])
-                print(item_id)
-
                 item = get_object_or_404(MenuItem, id=item_id)
                 quantity = int(row[1])
 
@@ -191,7 +189,7 @@ def upload_order_data(request):
                 order.save()
 
             except Http404:
-                print(f'could not add data for {row}')
+                print(f'could not add data for {row}, model with id: {row[1]} didnt exist.')
                 pass
 
         
