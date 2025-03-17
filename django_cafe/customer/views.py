@@ -38,7 +38,7 @@ def order_page(request):
 @login_required(login_url='/auth/login')
 def place_order(request):
     if request.method == 'POST':
-        selected_items = {}
+        selected_items = dict()
         for key, value in request.POST.items():
             if key.startswith('quantity_') and int(value) > 0:
                 item_id = key.replace('quantity_', '')
@@ -48,28 +48,25 @@ def place_order(request):
             messages.error(request, 'Please select at least one item to order.')
             return redirect('order_page')
         
-        total_price = 0
         order_items = []
+        total_price = 0
         
         for item_id, quantity in selected_items.items():
             menu_item = get_object_or_404(MenuItem, id=item_id)
-            item_total = menu_item.price * quantity
-            total_price += item_total
             
             order_items.append({
-                'menu_item': menu_item,
+                'menu_item': item_id,
                 'quantity': quantity,
-                'item_total': item_total
+                'item_name': menu_item.name
             })
+
+            total_price+=menu_item.price*quantity
         
-        request.session['order_preview'] = {
-            'items': [(item['menu_item'].id, item['quantity']) for item in order_items],
-            'total_price': str(total_price)
-        }
+        request.session['order_preview'] = [(item['menu_item'], item['quantity']) for item in order_items]
         
         return render(request, 'customer/order_confirmation.html', {
             'items': order_items,
-            'total_price': str(total_price)
+            'total_price': total_price
         })
     
     return redirect('order_page')
@@ -82,26 +79,22 @@ def confirm_order(request):
         if not order_data:
             messages.error(request, 'Your order session has expired. Please start again.')
             return redirect('order_page')
-        print(request.user)
-        total_price = float(order_data['total_price'])
+        
         order = Order.objects.create(
             customer=request.user,
-            total_price=total_price,
             status='pending'
         )
 
         log_items = list()
         categories_ordered = set()
         
-        for item_id, quantity in order_data['items']:
-            menu_item = get_object_or_404(MenuItem, id=item_id)
-            item_total = menu_item.price * quantity
-            
+        for item in order_data:
+            menu_item = get_object_or_404(MenuItem, pk=item[0])
+            quantity = item[1]
             OrderItem.objects.create(
                 menu_item=menu_item,
                 item_qty=quantity,
                 order_instance=order,
-                item_total_price=item_total
             )
 
             log_items.append({
@@ -113,11 +106,13 @@ def confirm_order(request):
             })
             categories_ordered.add(menu_item.get_category_display())
 
+        order.update_total_price()
+
         order_logger.info(
             f"Order placed - ID: {order.id} | User: {request.user.username} | "
             f"Time: {order.place_time.strftime('%Y-%m-%d %H:%M:%S')} | "
             f"Categories: {', '.join(categories_ordered)} | "
-            f"Total: {total_price} | "
+            f"Total: {order.total_price} | "
             f"Items: {log_items}"
         )
         

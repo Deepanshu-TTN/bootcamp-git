@@ -2,9 +2,10 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from management.models import MenuItem
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from decimal import Decimal
 
 User = get_user_model()
 
@@ -35,6 +36,12 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.customer.username if self.customer else 'Offline Order'}'s order at {self.place_time}"
+    
+    def update_total_price(self, save=True):
+        total_price = sum(item.item_total_price for item in self.orderitem_set.all())
+        self.total_price = total_price
+        if save:
+            self.save()
 
 
 @receiver(pre_save, sender=Order)
@@ -44,6 +51,9 @@ def check_status(sender, instance, *args, **kwargs):
     
     else:
         instance.completed_time = None
+    
+    if not instance.pk:
+        return
 
 
 class OrderItem(models.Model):
@@ -59,3 +69,27 @@ class OrderItem(models.Model):
     ])
     order_instance = models.ForeignKey(Order, on_delete=models.CASCADE)
     item_total_price = models.DecimalField(default=0, decimal_places=2, max_digits=10)
+
+
+    def update_item_total_price(self, save=True):
+        self.item_total_price = Decimal(self.item_qty) * self.menu_item.price
+        if save:
+            self.save()
+        
+
+
+@receiver(pre_save, sender=OrderItem)
+def update_order_item_price(sender, instance, *args, **kwargs):
+    instance.update_item_total_price(False)
+    
+
+@receiver(post_save, sender=OrderItem)
+def update_order_price(sender, instance, *args, **kwargs):
+    if instance.order_instance:
+        instance.order_instance.update_total_price()
+
+
+@receiver(post_delete, sender=OrderItem)
+def remove_order_item_from_order(sender, instance, **kwargs):
+    if instance.order_instance:
+        instance.order_instance.update_total_price()

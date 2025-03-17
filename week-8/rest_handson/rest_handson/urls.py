@@ -1,5 +1,5 @@
 """
-URL configuration for django_cafe project.
+URL configuration for rest_handson project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -16,22 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView 
+from oauth2_provider import urls as oauth2_urls
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('customer.urls')),
-    path('manage/', include('management.urls')),
-    path('auth/', include('cafe_auth.urls')),
-    path('api/', include('api.urls')),
+    # path('api/auth/', include('authAPI.urls')), ##jwt authentication
+    path('api/o/', include(oauth2_urls)),
+    path('api-auth/',include('rest_framework.urls')),
+    path('api/users/', include('usersAPI.urls'))
     
-    path('api/token', TokenObtainPairView.as_view(), name='token_obtain'),
-    path('api/refresh', TokenRefreshView.as_view(), name='token-refresh')
 ]
-
-if settings.DEBUG:
-    urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

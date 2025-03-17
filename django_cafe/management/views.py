@@ -173,7 +173,6 @@ def upload_order_data(request):
                 order, _ = Order.objects.get_or_create(
                     id=order_id,
                     defaults={
-                        'id': order_id,
                         'status': 'completed'
                     })
 
@@ -183,10 +182,7 @@ def upload_order_data(request):
                 )
 
                 order_item.item_qty += quantity
-                order_item.item_total_price = order_item.item_qty * item.price
-                order.total_price += order_item.item_total_price
                 order_item.save()
-                order.save()
 
             except Http404:
                 print(f'could not add data for {row}, model with id: {row[1]} didnt exist.')
