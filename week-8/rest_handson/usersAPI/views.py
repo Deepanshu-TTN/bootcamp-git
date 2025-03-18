@@ -24,6 +24,7 @@ class UserDetails(RetrieveAPIView):
     serializer_class = UserSerializer
 
 
+'''
 class UserViewSet(ViewSet):
 
     def list(self, request):
@@ -36,6 +37,8 @@ class UserViewSet(ViewSet):
         user = get_object_or_404(queryset, pk=pk)
         serializer = UserSerializer(user)
         return Response(serializer.data)
+'''
+
     
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer

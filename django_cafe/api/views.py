@@ -14,7 +14,7 @@ def create_user(request):
         if not request.user.is_authenticated:
             return Response({'error': "Must be logged in to create staff accounts"}, status.HTTP_401_UNAUTHORIZED)
         
-        if not request.user.is_staff:
+        if not request.user.is_superuser:
             return Response({'error': "Only Super User can create staff accounts"}, status.HTTP_403_FORBIDDEN)
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
