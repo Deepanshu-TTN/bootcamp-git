@@ -10,7 +10,7 @@ from django.core.files.base import ContentFile
 
 
 class UserSerializer(serializers.Serializer):
-    id = serializers.CharField()
+    id = serializers.CharField(read_only=True)
     username = serializers.CharField(max_length=16, min_length=5, required=True,
         validators=[
             UniqueValidator(queryset=User.objects.all()),
@@ -65,7 +65,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
 
-class OrderItemSerializer(serializers.ModelSerializer):
+class OrderItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['id', 'menu_item', 'menu_item_name', 'item_qty', 'item_total_price']
@@ -79,13 +79,53 @@ class OrderItemCreateSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1, max_value=10)
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.HyperlinkedModelSerializer):
+    customer = serializers.HyperlinkedRelatedField(
+        view_name='users-detail',
+        read_only=True
+    )
     class Meta:
         model = Order
         fields = ['id', 'customer', 'customer_username', 'total_price',
                   'status_display', 'place_time', 'completed_time', 'items']
         read_only_fields = ['total_price', 'place_time', 'completed_time', 'customer']
+
     
     customer_username = serializers.CharField(source = 'customer.username', read_only=True)
     status_display = serializers.CharField(source = 'get_status_display', read_only=True)
-    items = OrderItemSerializer(source='orderitem_set', read_only=True)
+    items = OrderItemSerializer(source='orderitem_set', read_only=True, many=True)
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    items = OrderItemCreateSerializer(many=True, write_only=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'items']
+    
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        customer = self.context['request'].user
+        
+        order = Order.objects.create(customer=customer, status='pending')
+        
+        for item_data in items_data:
+            OrderItem.objects.create(
+                order_instance=order,
+                menu_item=item_data['menu_item'],
+                item_qty=item_data['quantity']
+            )        
+        return order
+
+
+class OrderStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status']
+        
+        
+class StatisticsSerializer(serializers.Serializer):
+    total_revenue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_orders = serializers.IntegerField()
+    average_order_value = serializers.DecimalField(max_digits=10, decimal_places=2)
+    top_items = serializers.ListField(child=serializers.DictField())
+    top_categories = serializers.ListField(child=serializers.DictField())

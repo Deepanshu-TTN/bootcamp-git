@@ -13,15 +13,13 @@ urlpatterns = [
     path('auth/token-revoke/', RevokeTokenView.as_view(), name='token-revoke'),
     
     path('users/', views.UserList.as_view(), name='users-list'),
-    path('users/<str:pk>/', views.UserDetail.as_view(), name='users-list'),
+    path('users/<str:pk>/', views.UserDetail.as_view(), name='users-detail'),
+
+    path('', include(router.urls)),
+    path('orders/', views.OrderAPIView.as_view(), name='orders-list'),
+    path('orders/<int:pk>', views.OrderAPIView.as_view(), name='orders-detail'),
     
-    #public apis
-    
-    #management apis
-    path('', include(router.urls))
-    
-    
-    #customer apis
+    path('stats/', views.StatisticsAPIView.as_view(), name='stats')
     
     
 ]
