@@ -18,8 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView 
 
 
 urlpatterns = [
@@ -28,9 +26,6 @@ urlpatterns = [
     path('manage/', include('management.urls')),
     path('auth/', include('cafe_auth.urls')),
     path('api/', include('api.urls')),
-    
-    path('api/token', TokenObtainPairView.as_view(), name='token_obtain'),
-    path('api/refresh', TokenRefreshView.as_view(), name='token-refresh')
 ]
 
 if settings.DEBUG:

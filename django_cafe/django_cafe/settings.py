@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'rest_framework_simplejwt',
+    'oauth2_provider',
+    # 'rest_framework_simplejwt',
     'customer.apps.CustomerConfig',
     'management.apps.ManagementConfig',
     'cafe_auth.apps.AuthConfig'
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -138,6 +140,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+LOGIN_URL = '/auth/login'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -156,17 +160,35 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
 
-
-JWT_KEY = "HUbvsXfeJu3aGvRn7pXMyt5U0gSxtElk1/+Bm+&|,apop5]%K=(~zG*22DPk[a)Tds]zh>jQd|Zg8=MHUbvsXfeJu3aGvRn7pXMyt5U0gSxtElk'@t"
-
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=2),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "SIGNING_KEY": JWT_KEY,
-
+OAUTH2_PROVIDER = {
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope',},
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore',
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 24*60*60,
 }
+# register oauth and got id and secret: 
+# client id = 43QwNCMvxSyFFMJ80AFidiqeFKtlYEDri7AtINwN
+# client secret = YVuLlc6dEWD8cLAsDh7EQfvM8hqXCN5c5hqqIbJs5UP8dSxT7bGbSNjlqufcxet9xWB2esJCa7mW6WpaKhdlZQYWkbo1yMuASEiAIpsKblG1P2V6yw04lmLlz4TpnLdP
+
+
+
+# JWT_KEY = "HUbvsXfeJu3aGvRn7pXMyt5U0gSxtElk1/+Bm+&|,apop5]%K=(~zG*22DPk[a)Tds]zh>jQd|Zg8=MHUbvsXfeJu3aGvRn7pXMyt5U0gSxtElk'@t"
+
+
+# SIMPLE_JWT = {
+#     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=2),
+#     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+#     "SIGNING_KEY": JWT_KEY,
+
+# }
