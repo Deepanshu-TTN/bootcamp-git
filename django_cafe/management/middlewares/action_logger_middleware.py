@@ -15,6 +15,8 @@ class ItemActivitiesMiddleware:
 
         if self._is_target_app(request.path):
             operation = self._get_operation(request)
+            if operation is None:
+                operation = self._get_api_operation(request.method)
             model_id = self._get_model_id(request.path)
             user = request.user
             if operation:
@@ -30,7 +32,7 @@ class ItemActivitiesMiddleware:
     
 
     def _is_target_app(self, path):
-        return '/manage/' in path
+        return '/manage/' in path or '/api/menu-items' in path
     
     def _get_operation(self, request):
         if request.method == "POST":
@@ -43,6 +45,15 @@ class ItemActivitiesMiddleware:
 
             return 'Other'
         
+        return None
+    
+    def _get_api_operation(self, method):
+        if method=="POST":
+            return 'Create'
+        if method=="PUT":
+            return 'Update'
+        if method=="DELETE":
+            return 'Delete'
         return None
 
     def _get_model_id(self, path):
