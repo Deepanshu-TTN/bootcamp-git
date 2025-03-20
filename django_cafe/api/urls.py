@@ -19,7 +19,7 @@ urlpatterns = [
     path('orders/', views.OrderAPIView.as_view(), name='orders-list'),
     path('orders/<int:pk>', views.OrderAPIView.as_view(), name='orders-detail'),
     
-    path('stats/', views.StatisticsAPIView.as_view(), name='stats')
+    path('stats/', views.StatisticsAPIView.as_view(), name='api-stats')
     
     
 ]

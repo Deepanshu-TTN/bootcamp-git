@@ -2,8 +2,9 @@ from rest_framework import status, permissions, views, generics, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models import Q, Sum, Avg
+from django.db.models import Q, Sum, Avg, F
 from api.serializers import (UserSerializer, MenuItemSerializer, StatisticsSerializer,
     OrderSerializer, OrderCreateSerializer, OrderStatusUpdateSerializer)
 from management.models import MenuItem
@@ -159,26 +160,28 @@ class StatisticsAPIView(views.APIView):
         average_order_value = all_orders.aggregate(avg=Avg('total_price'))['avg'] or 0
         
         top_items = OrderItem.objects.values(
-            'menu_item__id', 
-            'menu_item__name'
+            item_id=F('menu_item__id'), 
+            item_name=F('menu_item__name')
         ).annotate(
-            count=Sum('item_qty'),
+            units_sold=Sum('item_qty'),
             revenue=Sum('item_total_price')
         ).order_by('-revenue')[:10]
         
         for item in top_items:
-            item['url'] = request.build_absolute_uri(f"/api/menu-items/{item['menu_item__id']}/")
-        
+            item['url'] = request.build_absolute_uri(reverse('menuitem-detail', args={item['item_id']}))
+            
         top_categories = OrderItem.objects.values(
-            'menu_item__category',
+            category_id=F('menu_item__category'),
         ).annotate(
             category=MenuItem._category_case_statement,
             revenue=Sum('item_total_price'),
         ).order_by('-revenue')[:10]
         
         for category in top_categories:
-            category_id = category['menu_item__category']
-            category['url'] = request.build_absolute_uri(f"/api/menu-items/?category={category_id}")
+            category['url'] = request.build_absolute_uri(
+                reverse('menuitem-list')
+                +f"?category={category['category_id']}"
+            )
         
         data = {
             'total_revenue': total_revenue,
