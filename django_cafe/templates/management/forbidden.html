@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forbidden</title>
-</head>
-<body>
-    <h1>ohno, looks like you tried to visit a page you can't access</h1>
-    <a href="{% url 'home' %}">home</a>
-</body>
-</html>
+{% extends 'components/base.html' %}
+{%block content%}
+<div class="text-center mt-4">
+    <h1 class="display-4">Oh no, looks like you tried to visit a page you can't access!</h1>
+    <p class="lead">You don't have permission to view this page.</p>
+    <a href="{% url 'home' %}" class="btn btn-light btn-lg">Go to Home</a>
+</div>
+
+{%endblock%}

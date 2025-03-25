@@ -1,25 +1,8 @@
-{% if status %}
-<h1>
-    Viewing {{status}} orders
-</h1>
-{%else%}
-<h1>
-    Viewing all orders
-</h1>
-{% endif %}
-<form action="{%url 'orders_list'%}">
-    <button type="submit" name="status" value="completed">View Completed</button>
-    <button type="submit" name="status" value="pending">View Pending</button>
-    <button type="submit" name="status" value="canceled">View Cancelled</button>
-    <button type="submit">View All</button>
-</form>
-<button><a href="{% url 'manage' %}">Manage Menu Items</a></button>
-{%for order in order_list %}
-<p>{{order.place_time}}</p>
-<p>Rs. {{order.total_price}}</p>
-{% for item in order.orderitem_set.all %}
-<p>{{item.menu_item.name}} x{{item.item_qty}}: Rs. {{item.item_total_price}}</p>
-{%endfor%}
-<br>
-    <a href="{% url 'order_detail' order.id %}">view order</a>
-{%endfor%}
+{% extends 'components/base.html' %}
+{% block title %}Order{% endblock %}
+
+{% block content %}
+{% include 'components/management_header.html' with user=user %}
+{% include 'components/orders_table.html' with orders=order_list detail='order_detail'%}
+
+{% endblock %}

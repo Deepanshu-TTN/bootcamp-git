@@ -1,29 +1,9 @@
 {% extends 'components/base.html' %}
-{%block title%}Order{%endblock%}
-{%block content%}
-{% include 'components/customer_header.html' with user=user%}
-{% if status %}
-<h1>
-    Viewing {{status}} orders
-</h1>
-{%else%}
-<h1>
-    Viewing all orders
-</h1>
-{% endif %}
-<form action="{%url 'order_history'%}">
-    <button type="submit" name="status" value="completed">View Completed</button>
-    <button type="submit" name="status" value="pending">View Pending</button>
-    <button type="submit" name="status" value="canceled">View Cancelled</button>
-    <button type="submit">View All</button>
-</form>
-{%for order in orders %}
-<p>{{order.place_time}}</p>
-<p>{{order.total_price}}</p>
-{% for item in order.orderitem_set.all %}
-<p>{{item.menu_item.name}}</p>
-<p>{{item.item_total_pice}}</p>
-{%endfor%}
-    <a href="{% url 'order_detail_customer' order.id %}">view order</a>
-{%endfor%}
-{%endblock%}
+{% block title %}Order{% endblock %}
+
+{% block content %}
+{% include 'components/customer_header.html' with user=user %}
+
+{% include 'components/orders_table.html' with detail='order_detail_customer'%}
+
+{% endblock %}

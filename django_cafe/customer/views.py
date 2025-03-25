@@ -72,7 +72,8 @@ def place_order(request):
             order_items.append({
                 'menu_item': item_id,
                 'quantity': quantity,
-                'item_name': menu_item.name
+                'item_name': menu_item.name,
+                'price': menu_item.price*quantity
             })
 
             total_price+=menu_item.price*quantity
@@ -163,4 +164,4 @@ def view_orders(request):
         q &= Q(status__exact=status_value)
         
     orders = Order.with_items.get_orders_of(user).filter(q)
-    return render(request, 'customer/orders_list.html', {'orders': orders})
+    return render(request, 'customer/orders_list.html', {'orders': orders, 'status': status_value})
