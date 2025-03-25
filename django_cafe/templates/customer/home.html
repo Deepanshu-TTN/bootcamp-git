@@ -1,17 +1,102 @@
 {% extends 'components/base.html' %}
 {% block title %}Home - Django Cafe{% endblock %}
 {% block content %}
-{% include 'components/customer_header.html' with user=user%}
-{% include 'components/search.html' with redirect='home'%}
-{% if keyword or max_price %}
-<div class="container">
-    {% if keyword %}
-    <span> keyword: '{{keyword}}'</span>
-    {% endif %}
-    {% if max_price or min_price %} 
-    <span>price range: less than {{max_price}} </span>
-    {% endif %}
+<!-- Customer Header -->
+{% include 'components/customer_header.html' with user=user %}
+
+<div class="bg-dark" style="height: 100vh;">
+    
+    <!-- Carousel Section -->
+    <div id="welcomeCarousel" class="carousel slide carousel-fade d-flex align-items-center" data-bs-ride="carousel" 
+                    style="height: 70%;">
+         <div class="carousel-inner" style="justify-content: center;">
+             <div class="carousel-item active bg-dark text-white d-flex align-items-center" >
+                 <div class="container text-center">
+                     <h1 class="display-4">Welcome to Django Cafe</h1>
+                     <p class="lead">The best food and coffee experience awaits you!</p>
+                     <a href="{% url 'search' %}" class="btn btn-light btn-lg mt-4">Explore Our Menu</a>
+                </div>
+            </div>
+            <div class="carousel-item bg-dark text-white d-flex align-items-center" >
+                <div class="container text-center">
+                    <h1 class="display-4">Delicious Drinks & Treats</h1>
+                    <p class="lead">We serve a wide variety of coffees, desserts, and more!</p>
+                    <a href="{% url 'search'%}?category=0" class="btn btn-light btn-lg mt-4">Explore Our Menu</a>
+                </div>
+            </div>
+            <div class="carousel-item bg-dark text-white d-flex align-items-center">
+                <div class="container text-center">
+                    <h1 class="display-4">Order with Ease</h1>
+                    <p class="lead">Order your favorites with just a few clicks.</p>
+                    <a href="{% url 'order_page'%}" class="btn btn-light btn-lg mt-4">Order Now</a>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#welcomeCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#welcomeCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+<!-- Categories Ribbon Section -->
+<div class="categories-ribbon bg-dark text-white py-4">
+    <hr>
+    <div class="container pt-3">
+        <h1 class="display-4 text-center">
+            Shop by categories:
+        </h1>
+        <div class="d-flex justify-content-center">
+            {% for category in categories %}
+            <div class="category-item mx-3 p-3 text-center rounded-lg">
+                <a href="{%url 'search' %}?category={{ category.0 }}" class="" 
+                style="color: rgba(255, 255, 255, 0.55);
+                        text-decoration: none;
+                        background: 0 0;
+                        border: 0;
+                        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+                    "
+                onmouseover="this.style.color='rgba(255, 255, 255, 0.80)';" 
+                onmouseout="this.style.color='rgba(255, 255, 255, 0.55)';">
+                    <p>{{ category.1 }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
-{% endif %}
-{%include 'components/items_list.html' with manage=False %}
+</div>
+
+<!-- Search Bar (hidden initially) -->
+{% include 'components/search.html' with redirect='search' %}
+
+<!-- Top Items Section (hidden initially) -->
+<div class="container mt-4">
+  <h2 class="text-center">Top Items</h2>
+  <div class="row">
+    {% include 'components/items_list.html' with manage=False %}
+  </div>
+</div>
+
+
+
+
+{% endblock %}
+{% block extra_js %}
+<script>
+    window.addEventListener('scroll', function() {
+        const categoriesRibbon = document.querySelector('.categories-ribbon');
+        const searchSection = document.querySelector('[data-search-section]');
+        const topItemsSection = document.querySelector('.container.mt-4');
+        
+        if (window.scrollY > categoriesRibbon.offsetHeight) {
+            categoriesRibbon.style.display = 'block';
+            searchSection.style.display = 'block';  // Show search bar
+            topItemsSection.style.display = 'block';  // Show top items section
+        }
+    });
+</script>  
 {%endblock%}

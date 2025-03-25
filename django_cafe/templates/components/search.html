@@ -1,18 +1,33 @@
-<div class="container mt-4">
+<div class="container mt-5">
   <h1>Find items: </h1>
   <form action="{% url redirect %}" method="GET" class="d-flex">
-    <input type="search" name="search" placeholder="Search.." aria-label="Search" class="form-control me-4 ">
-    <input type="number" name="lt" placeholder="Max Price.." aria-label="Price" class="form-control input-number me-4 w-25" min="1" max="10000">
+    <input type="search" name="search" placeholder="Search.." aria-label="Search" class="form-control me-4" 
+      value="{{ request.GET.search|default:'' }}">
+    
+    <input type="number" name="lt" placeholder="Max Price.." aria-label="Price" class="form-control input-number me-4 w-25" 
+      min="1" max="10000" value="{{ request.GET.lt|default:'' }}">
+    
     <select name="category" class="me-4 w-25">
-      <option value="" selected>All</option>
-      <option value="0">Coffee</option>
-      <option value="1">Tea</option>
-      <option value="2">Cookies</option>
-      <option value="3">Muffins</option>
-      <option value="4">Cakes & Cupcakes</option>
-      <option value="5">Pastries</option>
-      <option value="6">Light Bites</option>
+      <option value=""  {% if request.GET.category == '' %}selected{% endif %}>All</option>
+      <option value="0" {% if request.GET.category == '0' %}selected{% endif %}>Coffee</option>
+      <option value="1" {% if request.GET.category == '1' %}selected{% endif %}>Tea</option>
+      <option value="2" {% if request.GET.category == '2' %}selected{% endif %}>Cookies</option>
+      <option value="3" {% if request.GET.category == '3' %}selected{% endif %}>Muffins</option>
+      <option value="4" {% if request.GET.category == '4' %}selected{% endif %}>Cakes & Cupcakes</option>
+      <option value="5" {% if request.GET.category == '5' %}selected{% endif %}>Pastries</option>
+      <option value="6" {% if request.GET.category == '6' %}selected{% endif %}>Light Bites</option>
     </select>
+    
     <button type="submit" class="btn btn-dark me-4 w-10">Go</button>
+    <button type="button" class="btn btn-light me-4 w-10" onclick="clearForm()">Clear</button>
   </form>
 </div>
+
+<script>
+  function clearForm() {
+    document.querySelector("form").reset();
+    
+    const select = document.querySelector('select[name="category"]');
+    select.selectedIndex = 0;
+  }
+</script>

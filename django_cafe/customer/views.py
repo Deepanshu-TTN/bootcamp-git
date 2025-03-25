@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Sum, F
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from management.models import MenuItem
@@ -10,6 +10,21 @@ order_logger = logging.getLogger('orders')
 
 
 def home(request):
+    user = request.user if str(request.user)!='AnonymousUser' else None
+    top_items_by_count = OrderItem.objects.values(
+            'menu_item',
+        ).annotate(
+            count = Sum('item_qty'),
+        ).order_by('-count')[:4]
+    menu_item_ids = [item['menu_item'] for item in top_items_by_count]
+
+    top_items = MenuItem.objects.filter(id__in=menu_item_ids)
+    
+    return render(request, 'customer/home.html', {'items': top_items, 'user': user, 'categories': MenuItem._catagories})
+
+
+
+def search(request):
     search = request.GET.get('search')
     max_price = request.GET.get('lt')
     category = request.GET.get('category')
@@ -27,7 +42,7 @@ def home(request):
         q &= Q(category=category)
         
     menu_items = MenuItem.objects.filter(q)
-    return render(request, 'customer/home.html', {'items': menu_items, 'user': user, 'keyword': search, 'max_price':max_price})
+    return render(request, 'customer/search.html', {'items': menu_items, 'user': user, 'keyword': search, 'max_price':max_price})
 
 
 @login_required(login_url='/auth/login')
