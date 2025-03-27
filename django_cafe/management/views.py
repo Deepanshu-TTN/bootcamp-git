@@ -1,14 +1,14 @@
-import openpyxl
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, DetailView, TemplateView
-from django.db.models import Sum, Avg, Q, F
-from django.http import Http404
-from customer.models import Order, OrderItem
+from customer.models import Order
 from .models import MenuItem
 from .forms import MenuItemForm
+from management.selectors import get_stats_context, get_items_query
+from customer.services import update_order_status, bulk_order_from_data
+from customer.selectors import all_orders
 
 '''
 def decorator_is_staff(func):
@@ -48,18 +48,7 @@ class ManageListView(CheckStaffMixin, ListView):
         max_price = self.request.GET.get('lt')
         category = self.request.GET.get('category')
 
-        q=Q()
-        if search:
-            q &= Q(name__icontains = search)
-
-        if max_price:
-            q &= Q(price__lt=max_price)
-
-        if category:
-            q &= Q(category=category)
-        
-        qs = super().get_queryset()
-        return qs.filter(q)
+        return get_items_query(search, max_price, category) 
 
 
 class EditMenuItem(CheckStaffMixin, UpdateView):
@@ -75,20 +64,16 @@ class DeleteMenuItem(CheckStaffMixin, PermissionRequiredMixin, DeleteView):
     pk_url_kwarg = 'itemid'
     success_url = reverse_lazy('manage')
     permission_required = 'can_delete_menuitems'
-    
 
-    
+
 class ManageOrdersListView(CheckStaffMixin, ListView):
     model = Order
     template_name = 'management/orders_list.html'
     
     def get_queryset(self):
-        qs = Order.with_items.all()
         status_value = self.request.GET.get('status')
-        if status_value:
-            qs.filter(status=status_value)
-        return qs
-    
+        return all_orders(status_value)
+
 
 class ViewOrderDetail(CheckStaffMixin, DetailView):
     model = Order
@@ -101,16 +86,11 @@ class ViewOrderDetail(CheckStaffMixin, DetailView):
         context['order_items'] = self.object.orderitem_set.all()
         context['options'] = Order.status.field.choices
         return context
-    
 
     def post(self, request, *args, **kwargs):
         order = self.get_object()
         new_status = request.POST.get('order_status')
-
-        if new_status:
-            order.status = new_status
-            order.save()
-
+        update_order_status(order, new_status)
         return redirect(reverse('order_detail', args=(order.id,)))
     
 
@@ -119,82 +99,16 @@ class OrderStatisticsView(CheckStaffMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        all_orders = Order.objects.all()
-        context['total_orders'] = all_orders.count()
-        context['total_revenue'] = all_orders.aggregate(total=Sum('total_price'))['total'] or 0
-        context['average_order_value'] = all_orders.aggregate(avg=Avg('total_price'))['avg'] or 0
-
-        # select final.name, sum(item_total_price) as revenue from 
-        # (select mgmt.name, cust.item_total_price from management_menuitem as mgmt 
-        # join customer_orderitem cust on cust.menu_item_id = mgmt.id)
-        # as final group by final.name order by revenue desc limit 10;
-        top_items = OrderItem.objects.values(
-            'menu_item__id', 
-            'menu_item__name'
-        ).annotate(
-            count = Sum('item_qty'),
-            revenue = Sum('item_total_price')
-        ).order_by('-revenue')[:10]
-        context['top_items'] = top_items   
-
-        # select management_menuitem.category, sum(customer_orderitem.item_total_price) as rev 
-        # from management_menuitem join customer_orderitem 
-        # on customer_orderitem.menu_item_id = management_menuitem.id 
-        # group by management_menuitem.category order by rev desc;
-        top_categories = OrderItem.objects.values(
-            'menu_item__category',
-        ).annotate(
-            category = MenuItem._category_case_statement,
-            revenue = Sum('item_total_price'),
-        ).order_by('-revenue')[:10]
-        
-        context['top_categories']=top_categories
-
-        return context
+        return get_stats_context(context)
 
 
 def upload_order_data(request):
     if request.method == 'POST':
         excel_file = request.FILES['excel_file']
-        
-        wb = openpyxl.load_workbook(excel_file)
-        worksheet = wb.active
-
-        for row in worksheet.iter_rows(values_only=True):
-            try:
-                item_id = int(row[0])
-                item = get_object_or_404(MenuItem, id=item_id)
-                quantity = int(row[1])
-
-                #assuming related data is already stored and
-                #we need to add items to an old order
-                order_id = int(row[2])
-                order, _ = Order.objects.get_or_create(
-                    id=order_id,
-                    defaults={
-                        'status': 'completed'
-                    })
-
-                order_item, _ = OrderItem.objects.get_or_create(
-                    menu_item=item,
-                    order_instance=order,
-                )
-
-                order_item.item_qty += quantity
-                order_item.save()
-
-            except Http404:
-                print(f'could not add data for {row}, model with id: {row[1]} didnt exist.')
-                pass
-
-        
+        bulk_order_from_data(excel_file)        
         return redirect('orders_list')
     
     return render(request, 'management/offline_data.html')
-
-        
-
 
 
 

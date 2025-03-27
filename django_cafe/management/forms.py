@@ -1,6 +1,5 @@
 from .models import MenuItem
 from django import forms
-from management.validators import validate_file_extension
 
 
 class MenuItemForm(forms.ModelForm):

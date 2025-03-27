@@ -2,9 +2,30 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
-from django.db.models import Case, When, Value
+from django.db.models import Case, When, Value, Q
 
 
+class MenuItemQueryset(models.QuerySet):
+    def filtered_items(self, search=None, max_price=None, category=None):
+        q=Q()
+        if search:
+            q &= Q(name__icontains = search)
+
+        if max_price:
+            q &= Q(price__lt=max_price)
+
+        if category:
+            q &= Q(category=category)
+        
+        return self.filter(q)
+
+
+class MenuItemManager(models.Manager):
+    def get_queryset(self):
+        return MenuItemQueryset(self.model, using=self.db)
+    
+    def filtered_items(self, search=None, max_price=None, category=None):
+        return self.get_queryset().filtered_items(search, max_price, category)
 
 
 class MenuItem(models.Model):
@@ -51,8 +72,8 @@ class MenuItem(models.Model):
     description = models.TextField()
     rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=5)
     image = models.ImageField(upload_to='images/', null=False, blank=False, default=_default_image)
-    
-
+        
+    objects = MenuItemManager()
 
     def delete(self, using = None, keep_parents = False):
         if self.image.name != self._default_image:
