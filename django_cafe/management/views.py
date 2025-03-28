@@ -74,6 +74,11 @@ class ManageOrdersListView(CheckStaffMixin, ListView):
         status_value = self.request.GET.get('status')
         return all_orders(status_value)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status'] = self.request.GET.get('status')
+        return context
+
 
 class ViewOrderDetail(CheckStaffMixin, DetailView):
     model = Order

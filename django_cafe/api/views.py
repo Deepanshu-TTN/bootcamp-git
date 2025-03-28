@@ -9,6 +9,7 @@ from api.serializers import (UserSerializer, MenuItemSerializer, StatisticsSeria
     OrderSerializer, OrderCreateSerializer, OrderStatusUpdateSerializer)
 from management.models import MenuItem
 from customer.models import Order, OrderItem
+from cafe_auth.services import create_user
 
 
 ## Function based drf view
@@ -24,7 +25,7 @@ def create_user(request):
             return Response({'error': "Only Super User can create staff accounts"}, status.HTTP_403_FORBIDDEN)
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        create_user(serializer.validated_data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

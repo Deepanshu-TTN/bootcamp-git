@@ -11,10 +11,15 @@ def get_user_order_with_items(order_id: int, customer):
 def get_user_orders(user, status):
     # previously had to write all of this
     # orders = Order.objects.filter(customer=user).order_by('-place_time').prefetch_related('orderitem_set')
-    return Order.with_items.get_orders_of(user).filter(status__exact=status)
+    qs = Order.with_items.get_orders_of(user)
+    print(status)
+    if status:
+        return qs.filter(status__exact=status)
+    return qs
     
 
 def all_orders(status=None):
     qs = Order.with_items.all()
     if status:
-        qs.filter(status=status)
+        return qs.filter(status=status)
+    return qs

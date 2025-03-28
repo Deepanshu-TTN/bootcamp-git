@@ -27,7 +27,9 @@
                   <p class="card-text text-muted mb-4">{{ item.description|truncatechars:27 }}</p>
                   <div class="d-flex justify-content-between align-items-center">
                       <span class="price">₹{{ item.price }}</span>
+                      {% if form %}
                       <input type="number" name="quantity_{{ item.id }}" min="0" max="10" value="0" class="form-control" style="width: 80px;">
+                      {% endif %}
                   </div>
                   {% if manage %}
                   <div class="d-flex align-items-center justify-content-between" style="padding-top:10px">

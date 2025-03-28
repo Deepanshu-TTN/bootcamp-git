@@ -42,7 +42,7 @@ def create_order_preview(request) -> tuple[list, float]:
             'price': menu_item.price*quantity
         })
 
-        total_price+=menu_item.price*quantity
+        total_price+=float(menu_item.price)*quantity
     
     request.session['order_preview'] = [(item['menu_item'], item['quantity']) for item in order_items]
     return order_items, total_price

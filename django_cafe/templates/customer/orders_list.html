@@ -4,6 +4,6 @@
 {% block content %}
 {% include 'components/customer_header.html' with user=user %}
 
-{% include 'components/orders_table.html' with detail='order_detail_customer'%}
+{% include 'components/orders_table.html' with detail='order_detail_customer' orders_page='order_history'%}
 
 {% endblock %}

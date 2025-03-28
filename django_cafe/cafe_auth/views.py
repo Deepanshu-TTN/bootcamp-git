@@ -5,6 +5,7 @@ from cafe_auth.forms import SignUpForm, LoginForm
 from django.views.generic import FormView
 from django.urls import reverse_lazy
 from django.core.exceptions import ValidationError
+from cafe_auth.services import create_user, get_authenticated_user
 
 
 class SignUp(FormView):
@@ -24,7 +25,7 @@ class SignUp(FormView):
     
     def form_valid(self, form):
         try:
-            self.user = form.save()
+            self.user = create_user(form.cleaned_data)
             login(self.request, self.user)
             return super().form_valid(form)
         except ValidationError:
@@ -47,7 +48,9 @@ class Login(FormView):
     
     def form_valid(self, form):
         try:
-            user = form.save()
+            user = get_authenticated_user(form)
+            # if not user:
+            #     return self.form_invalid(form)
             login(self.request, user)
             return super().form_valid(form)
         except ValidationError:

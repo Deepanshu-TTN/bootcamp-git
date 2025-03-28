@@ -3,6 +3,6 @@
 
 {% block content %}
 {% include 'components/management_header.html' with user=user %}
-{% include 'components/orders_table.html' with orders=order_list detail='order_detail'%}
+{% include 'components/orders_table.html' with orders=order_list detail='order_detail' orders_page='orders_list'%}
 
 {% endblock %}

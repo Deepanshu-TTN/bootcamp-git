@@ -66,20 +66,12 @@ class SignUpForm(forms.Form):
         if not check_username.isalnum():
             self.add_error('username', "The username can only contain alphanumeric characters.")
             raise ValidationError("Invalid username.")
-        return check_username
-
-    def save(self):
-        try:
-            user = User.objects.create_user(
-                username=self.cleaned_data['username'], 
-                password=self.cleaned_data['password1'], 
-                is_staff=self.cleaned_data['is_staff']
-            )
-            return user
-        except IntegrityError:
+        
+        if User.objects.filter(username=check_username).exists():
             self.add_error('username', 'That username is already taken :(')
             raise ValidationError('That username is already taken :(')
-        
+        return check_username
+    
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=16, label="Username",
@@ -100,12 +92,3 @@ class LoginForm(forms.Form):
     
     def clean_username(self):
         return self.cleaned_data['username'].strip()
-        
-    def save(self):
-        user = authenticate(
-            username=self.cleaned_data['username'],
-            password=self.cleaned_data['password'])
-        if user is None:
-            self.add_error(None, "Invalid Credentials.")
-            raise ValidationError("Invalid Credentials.")
-        return user

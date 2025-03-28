@@ -75,6 +75,7 @@ def confirm_order(request):
             messages.error(request, str(e))
             return redirect('order_page')
 
+    messages.error(request, 'Your order session has expired. Please start again.')
     return redirect('order_page')
 
 
