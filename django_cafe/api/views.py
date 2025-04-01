@@ -1,3 +1,5 @@
+'''API-application Views'''
+
 from rest_framework import status, permissions, views, generics, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -8,15 +10,20 @@ from django.db.models import Q, Sum, Avg, F
 from api.serializers import (UserSerializer, MenuItemSerializer, StatisticsSerializer,
     OrderSerializer, OrderCreateSerializer, OrderStatusUpdateSerializer)
 from management.models import MenuItem
-from customer.models import Order, OrderItem
+from customer.models import Order
 from cafe_auth.services import create_user
+from management.selectors import get_stats_context
+from api.permissions import IsOwnerOrStaffUser, IsStaffUser
+from api.services import create_order_service
+# from customer.services import update_order_status
 
 
 ## Function based drf view
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
-def create_user(request):
+def create_user_api(request):
+    '''Function based api view for creating a user'''
     if request.data.get('is_staff', False):
         if not request.user.is_authenticated:
             return Response({'error': "Must be logged in to create staff accounts"}, status.HTTP_401_UNAUTHORIZED)
@@ -30,29 +37,16 @@ def create_user(request):
     
     return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-
-## PERMISSION CLASSES
-class IsStaffUser(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.is_staff
-    
-
-class IsOwnerOrStaffUser(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user.is_staff: return True
-        
-        if hasattr(obj, 'customer'):
-            return obj.customer == request.user
-        
-        return False
     
 ## user views using APIView concrete classes
 class UserDetail(generics.RetrieveAPIView):
+    '''User Detail API view to retrieve a single object json'''
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsOwnerOrStaffUser]
     
     def get_object(self):
+        '''Overriden get_object method for getting custom user detail if pk provided is "me"'''
         pk = self.kwargs.get('pk')
         if pk == 'me':
             return self.request.user
@@ -60,6 +54,7 @@ class UserDetail(generics.RetrieveAPIView):
     
     
 class UserList(generics.ListAPIView):
+    '''User List API View'''
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsStaffUser]
@@ -67,10 +62,15 @@ class UserList(generics.ListAPIView):
     
 ## view using model view set
 class MenuItemViewset(viewsets.ModelViewSet):
+    '''Model View set for MenuItem Model, provides actions:\n
+    post get(list) url: /menu-item/\n
+    get(retrieve/detail) put patch delete url:/menu-item/<pk>'''
+
     serializer_class = MenuItemSerializer
     queryset = MenuItem.objects.all()
     
     def get_permissions(self):
+        '''Method override for custom permission assignments'''
         if self.action in ['list', 'retrieve']:
             permission_classes = [permissions.AllowAny]
         else:
@@ -80,6 +80,7 @@ class MenuItemViewset(viewsets.ModelViewSet):
     
     
     def get_queryset(self):
+        '''Method override for applying search param filters'''
         query = Q()
         
         search = self.request.query_params.get('search', None)
@@ -95,12 +96,13 @@ class MenuItemViewset(viewsets.ModelViewSet):
         if category:
             query &= Q(category=category)
 
-        return super().get_queryset().filter(query)
+        return super().get_queryset().filtered_items(search, max_price, category) # custom manager function
     
     
 class OrderAPIView(views.APIView):
-    
+    '''Custom Order Model DRF APIView with get put post and delete methods'''
     def get_permissions(self):
+        '''Method override to show orders based on logged in user only.'''
         if self.request.method in ['PUT', 'DELETE']:
             permission_classes = [IsStaffUser]
         elif self.request.method == "GET":
@@ -111,6 +113,8 @@ class OrderAPIView(views.APIView):
         return [permission() for permission in permission_classes]
     
     def get(self, request, pk=None):
+        '''Get method, if pk provided show specific order after checkin permissions\n
+        Show all orders for the user otherwise'''
         if pk:
             order = get_object_or_404(Order, pk=pk)
             self.check_object_permissions(request=request, obj=order)
@@ -130,53 +134,52 @@ class OrderAPIView(views.APIView):
         return Response(data = serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
+        '''Post method, for order creation'''
         serializer = OrderCreateSerializer(data=request.data, context={'request':request})
+        
         if serializer.is_valid():
-            order = serializer.save()
+            # using the serializer create method
+            # order = serializer.save()
+            
+            # using a custom service
+            order = create_order_service(serializer.validated_data, request.user)
+            
             return Response(OrderSerializer(order, context={'request': request}).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request, pk):
+        '''Put method, for updating status'''
         order = get_object_or_404(Order, pk=pk)
         serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
         
         if serializer.is_valid():
             serializer.save()
+            # or
+            # update_order_status(order, serializer.validated_data.get('status'))
             return Response(OrderSerializer(order, context={'request':request}).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, pk):
+        '''Delete method, for deleting an order'''
         order = get_object_or_404(Order, pk=pk)
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class StatisticsAPIView(views.APIView):
+    '''Stats API View, returns stats for the application for a staff user'''
     permission_classes = [IsStaffUser]
     
     def get(self, request):
-        all_orders = Order.objects.all()
-        total_orders = all_orders.count()
-        total_revenue = all_orders.aggregate(total=Sum('total_price'))['total'] or 0
-        average_order_value = all_orders.aggregate(avg=Avg('total_price'))['avg'] or 0
+        '''Get method, gets the stats JSON object'''
         
-        top_items = OrderItem.objects.values(
-            item_id=F('menu_item__id'), 
-            item_name=F('menu_item__name')
-        ).annotate(
-            units_sold=Sum('item_qty'),
-            revenue=Sum('item_total_price')
-        ).order_by('-revenue')[:10]
+        stats = get_stats_context()
         
+        top_items = stats.pop('top_items')        
         for item in top_items:
             item['url'] = request.build_absolute_uri(reverse('menuitem-detail', args={item['item_id']}))
             
-        top_categories = OrderItem.objects.values(
-            category_id=F('menu_item__category'),
-        ).annotate(
-            category=MenuItem._category_case_statement,
-            revenue=Sum('item_total_price'),
-        ).order_by('-revenue')[:10]
+        top_categories = top_items = stats.pop('top_categories')
         
         for category in top_categories:
             category['url'] = request.build_absolute_uri(
@@ -185,9 +188,9 @@ class StatisticsAPIView(views.APIView):
             )
         
         data = {
-            'total_revenue': total_revenue,
-            'total_orders': total_orders,
-            'average_order_value': average_order_value,
+            'total_revenue': stats.pop('total_revenue', 0),
+            'total_orders': stats.pop('total_orders', 0),
+            'average_order_value': stats.pop('average_order_value', 0),
             'top_items': top_items,
             'top_categories': top_categories
         }

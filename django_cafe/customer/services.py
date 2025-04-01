@@ -49,6 +49,9 @@ def create_order_preview(request) -> tuple[list, float]:
 
 
 def confirm_and_create_order(request):
+    '''Customer service to create order from given request\n
+    Request should contain : user, order_preview dict in session\n
+    Returns newly created order id'''
     order_logger = logging.getLogger('orders')
     order_data = request.session.get('order_preview')
     

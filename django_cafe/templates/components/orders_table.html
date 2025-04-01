@@ -22,7 +22,9 @@
             <thead class="table-dark">
                 <tr>
                     <th scope="col">Order Time</th>
+                    {% if orders_page == 'orders_list' %}
                     <th scope="col">Customer</th>
+                    {%endif%}
                     <th scope="col">Total Price</th>
                     <th scope="col">Items</th>
                     <th scope="col">Details</th>
@@ -32,7 +34,9 @@
                 {% for order in orders %}
                     <tr>
                         <td>{{ order.place_time }}</td>
+                        {% if orders_page == 'orders_list' %}
                         <td>{{ order.customer.username }}</td>
+                        {%endif%}
                         <td>₹{{ order.total_price }}</td>
                         <td>
                             <ul>

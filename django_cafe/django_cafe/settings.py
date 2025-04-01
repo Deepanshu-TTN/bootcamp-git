@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     # 'rest_framework_simplejwt',
     'customer.apps.CustomerConfig',
     'management.apps.ManagementConfig',
-    'cafe_auth.apps.AuthConfig'
+    'cafe_auth.apps.AuthConfig',
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     ##registering my middlewares
     'management.middlewares.action_logger_middleware.ItemActivitiesMiddleware',
     'management.middlewares.ip_blocker_middleware.blocker_middleware',
@@ -158,6 +159,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+INTERNAL_IPS = [
+    "localhost",
+    "127.0.0.1",
+    # ...
+]
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100000000
 

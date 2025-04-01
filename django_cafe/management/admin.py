@@ -1,3 +1,5 @@
+'''Management admin configurations'''
+
 import csv
 from django.http import HttpResponse
 from django.contrib import admin
@@ -9,6 +11,7 @@ admin.site.site_header = 'Admin Dashboard'
 
 @admin.action(description='Download CSV for selected')
 def download_csv(model_admin, request, queryset):
+    '''Admin action function, provides csv file for selected queryset'''
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="Menu Items.csv"'
     writer = csv.writer(response)
@@ -23,10 +26,12 @@ def download_csv(model_admin, request, queryset):
 
 
 class MenuItemPriceFilter(admin.SimpleListFilter):
+    '''Filter class for price filter'''
     title = 'Price Range Filter'
     parameter_name = 'price'
 
     def lookups(self, request, model_admin):
+        '''Method override returns a sequence of logical and display values for lookups'''
         return (
             ('0-50', '0-50 Rs'),
             ('50-100', '50-100 Rs'),
@@ -35,6 +40,7 @@ class MenuItemPriceFilter(admin.SimpleListFilter):
         )
     
     def queryset(self, request, queryset):
+        '''Method override to return queryset based on given logical lookup strings'''
         if self.value() == '0-50':
             return queryset.filter(item_price__lte=50)
         if self.value() == '50-100':
@@ -46,10 +52,12 @@ class MenuItemPriceFilter(admin.SimpleListFilter):
         
 
 class MenuCategoryFilter(admin.SimpleListFilter):
+    '''Filter class for categories'''
     title='Filter by Categories'
     parameter_name='category'
 
     def lookups(self, request, model_admin):
+        '''Method override returns a sequence of logical and display values for lookups'''
         return (
             (0, 'Coffee'),
             (1, 'Tea'),
@@ -61,6 +69,7 @@ class MenuCategoryFilter(admin.SimpleListFilter):
         )
     
     def queryset(self, request, queryset):
+        '''Method override to return queryset based on given logical lookup strings'''
         if self.value() is not None:
             category = int(self.value())
             return queryset.filter(category=category)
@@ -70,6 +79,7 @@ class MenuCategoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
+    '''MenuItem Admin config class'''
     list_display = ('id', 'name', 'price', 'category', 'rating')
     search_fields = ('name',)
     list_filter = (MenuItemPriceFilter, MenuCategoryFilter)

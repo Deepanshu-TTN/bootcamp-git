@@ -1,13 +1,12 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 class SignUpForm(forms.Form):
+    '''Custom Signup form with custom fields and validations'''
     username = forms.CharField(max_length=16, label='Username',
         help_text="Your username must be unique. We'll let you know if someone has taken it already.",
         widget=forms.TextInput(attrs={
@@ -74,6 +73,7 @@ class SignUpForm(forms.Form):
     
 
 class LoginForm(forms.Form):
+    '''Custom Login Form with username and password fields'''
     username = forms.CharField(max_length=16, label="Username",
         widget=forms.TextInput(
             attrs={
@@ -91,4 +91,5 @@ class LoginForm(forms.Form):
         )
     
     def clean_username(self):
+        '''Return a username with no leading or trailing whitespaces'''
         return self.cleaned_data['username'].strip()

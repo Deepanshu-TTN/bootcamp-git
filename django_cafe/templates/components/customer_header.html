@@ -2,7 +2,7 @@
   <div class="container container-fluid">
     {% if user %}
     <a class="navbar-brand" href="{% url 'home'%}">
-      <img src="/media/favicon.ico" alt="CafE">
+      <img class="icon-rotate" src="/media/favicon.ico" alt="CafE">
       Hello {{ user }}! 
     </a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -20,7 +20,7 @@
       <a class="btn btn-outline-danger shadow" role="button" href="{% url 'logout' %}">Log Out</a>
       {%else%}
       <a class="navbar-brand" href="{% url 'home'%}">
-        <img src="/media/logo.png" alt="CafE">
+        <img class="icon-rotate" src="/media/logo.png" alt="CafE">
         Welcome to the CafE! 
       </a>
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">

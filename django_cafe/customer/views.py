@@ -10,6 +10,7 @@ from customer.selectors import get_user_order_with_items, get_user_orders
 
 
 def home(request):
+    '''Landing page view'''
     user = request.user if str(request.user)!='AnonymousUser' else None
     top_items_by_count = get_top_items_bycount(limit=4)
     return render(request, 'customer/home.html', {
@@ -20,6 +21,7 @@ def home(request):
 
 
 def search(request):
+    '''Search page view'''
     user = request.user if str(request.user)!='AnonymousUser' else None
     search = request.GET.get('search')
     max_price = request.GET.get('lt')
@@ -36,11 +38,13 @@ def search(request):
 
 @login_required(login_url='/auth/login')
 def order_page(request):
+    '''Order Page view'''
     return render(request, 'customer/order.html', {'items': get_items()})
 
 
 @login_required(login_url='/auth/login')
 def place_order(request):
+    '''Place Order view'''
     if request.method == 'POST':
         try:
             order_items, total_price = create_order_preview(request)
@@ -62,6 +66,7 @@ def place_order(request):
 
 @login_required(login_url='/auth/login')
 def confirm_order(request):
+    '''Confirm Order view'''
     if request.method == 'POST':
         try:
             new_order = confirm_and_create_order(request)
@@ -81,6 +86,7 @@ def confirm_order(request):
 
 @login_required(login_url='/auth/login')
 def order_detail(request, order_id):
+    '''Order detail view/ use with pk'''
     try:
         order, order_items = get_user_order_with_items(order_id, request.user)
         
@@ -95,6 +101,7 @@ def order_detail(request, order_id):
 
 @login_required(login_url='/auth/login')
 def view_orders(request):
+    '''Order history View for user'''
     user = request.user
     status_value = request.GET.get('status')
     orders = get_user_orders(user, status_value)

@@ -69,10 +69,11 @@ class DeleteMenuItem(CheckStaffMixin, PermissionRequiredMixin, DeleteView):
 class ManageOrdersListView(CheckStaffMixin, ListView):
     model = Order
     template_name = 'management/orders_list.html'
+    context_object_name = 'orders' # <modelname>_list otherwise, here order_list
     
     def get_queryset(self):
         status_value = self.request.GET.get('status')
-        return all_orders(status_value)
+        return all_orders(status_value).select_related('customer')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
